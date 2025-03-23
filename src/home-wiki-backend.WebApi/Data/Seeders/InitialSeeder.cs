@@ -4,14 +4,24 @@ using home_wiki_backend.DAL.Data;
 
 namespace home_wiki_backend.Seeders;
 
+/// <summary>
+/// Initial seeder for the database.
+/// </summary>
 public class InitialSeeder : ISeeder
 {
     private readonly DbWikiContext _context;
     private readonly Random _random = new();
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="InitialSeeder"/> class.
+    /// </summary>
+    /// <param name="context">The database context.</param>
     public InitialSeeder(DbWikiContext context)
     {
         _context = context;
     }
+
+    /// <inheritdoc/>
 
     public bool AlreadySeeded()
     {
@@ -20,6 +30,7 @@ public class InitialSeeder : ISeeder
                _context.Tags.Any();
     }
 
+    /// <inheritdoc/>
     public void Seed()
     {
         if (AlreadySeeded()) return;
