@@ -5,6 +5,10 @@ VisualStudioVersion = 17.12.35707.178
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "home-wiki-backend.WebApi", "home-wiki-backend.WebApi\home-wiki-backend.WebApi.csproj", "{B13B539B-91D7-4533-978C-CF62BE64808F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "home-wiki-backend.DAL.Common", "home-wiki-backend.DAL.Common\home-wiki-backend.DAL.Common.csproj", "{8613F8C1-3507-4832-8A81-88AB9A0FD78F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "home-wiki-backend.DAL", "home-wiki-backend.DAL\home-wiki-backend.DAL.csproj", "{A2CDEC38-16B1-4FD0-BE66-38EE74F262B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{B13B539B-91D7-4533-978C-CF62BE64808F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B13B539B-91D7-4533-978C-CF62BE64808F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B13B539B-91D7-4533-978C-CF62BE64808F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8613F8C1-3507-4832-8A81-88AB9A0FD78F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8613F8C1-3507-4832-8A81-88AB9A0FD78F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8613F8C1-3507-4832-8A81-88AB9A0FD78F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8613F8C1-3507-4832-8A81-88AB9A0FD78F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2CDEC38-16B1-4FD0-BE66-38EE74F262B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2CDEC38-16B1-4FD0-BE66-38EE74F262B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2CDEC38-16B1-4FD0-BE66-38EE74F262B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2CDEC38-16B1-4FD0-BE66-38EE74F262B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
