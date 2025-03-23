@@ -11,7 +11,8 @@ namespace home_wiki_backend
             var builder = WebApplication.CreateBuilder(args);
 
             // Register DbContext with Azure SQL connection string
-            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+            var connectionString = builder.Configuration
+                .GetConnectionString("DefaultConnection");
             builder.Services.AddDbContext<DbWikiContext>(options =>
                 options.UseSqlServer(connectionString));
 
@@ -26,7 +27,6 @@ namespace home_wiki_backend
                 });
             });
 
-            // Add services to the container.
             builder.Services.AddControllers();
 
             builder.Services.AddSwaggerGen(options =>
@@ -43,7 +43,14 @@ namespace home_wiki_backend
 
             var app = builder.Build();
 
-            // Enable CORS before controllers and endpoints
+            // Auto-apply migrations
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<DbWikiContext>();
+                db.Database.Migrate();
+            }
+
+            // Enable CORS globally
             app.UseCors("AllowAll");
 
             if (app.Environment.IsDevelopment())
