@@ -7,7 +7,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace home_wiki_backend.DAL.Repositories;
 
-public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : ModelBase
+public class GenericRepository<TEntity> : IGenericRepository<TEntity> 
+    where TEntity : ModelBase
 {
     private readonly DbWikiContext _context;
     private readonly DbSet<TEntity> _dbSet;
@@ -277,7 +278,8 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
         {
             await using var newContext = new DbWikiContext(_context.Options);
             var newDbSet = newContext.Set<TEntity>();
-            return await newDbSet.AsNoTracking()
+            return await newDbSet
+                .AsNoTracking()
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync(cancellationToken)

@@ -1,6 +1,5 @@
-using home_wiki_backend.Contracts;
 using home_wiki_backend.DAL.Data;
-using home_wiki_backend.Seeders;
+using home_wiki_backend.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
@@ -19,6 +18,9 @@ namespace home_wiki_backend
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            builder.Services.ConfigureDependencyInjection();
+
             // Register DbContext with Azure SQL connection string
             var connectionString = builder.Configuration
                 .GetConnectionString("DefaultConnection");
@@ -51,8 +53,6 @@ namespace home_wiki_backend
             });
 
             builder.Services.AddEndpointsApiExplorer();
-
-            builder.Services.AddScoped<ISeeder, InitialSeeder>();
 
             var app = builder.Build();
 
