@@ -87,7 +87,7 @@ namespace home_wiki_backend.DAL.Common.Contracts
         /// paths to the navigation properties to be included.</param>
         /// <returns>A task that represents the asynchronous operation. The task result
         /// contains the entity.</returns>
-        Task<TEntity> GetByIdAsync(Expression<Func<TEntity, bool>> predicate,
+        Task<TEntity?> GetByIdAsync(Expression<Func<TEntity, bool>> predicate,
             params Expression<Func<TEntity, object>>[] includes);
 
         /// <summary>

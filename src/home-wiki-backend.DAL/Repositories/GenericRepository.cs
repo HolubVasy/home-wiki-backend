@@ -169,7 +169,7 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEnt
     }
 
     /// <inheritdoc/>
-    public async Task<TEntity> GetByIdAsync(Expression<Func<TEntity, bool>> predicate,
+    public async Task<TEntity?> GetByIdAsync(Expression<Func<TEntity, bool>> predicate,
         params Expression<Func<TEntity, object>>[] includes)
     {
         try
