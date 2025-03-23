@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace home_wiki_backend.DAL.Repositories;
 
-public class GenericRepository<TEntity> : IGenericRepository<TEntity> 
+public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity> 
     where TEntity : ModelBase
 {
     private readonly DbWikiContext _context;
@@ -20,13 +20,24 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity>
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<TEntity>> GetAsync(Expression<Func<TEntity, bool>> predicate,
+    public async Task<IReadOnlyList<TEntity>> GetAsync(
+            Expression<Func<TEntity, bool>>? predicate = default,
+            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = default,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            return await _dbSet.AsNoTracking()
-                .Where(predicate)
+            var query = _dbSet.AsNoTracking();
+            if (predicate is not null)
+            {
+                query = query.Where(predicate);
+            }
+            if (orderBy is not null)
+            {
+                query = orderBy(query);
+            }
+
+            return await query
                 .ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
         }
@@ -272,14 +283,27 @@ public class GenericRepository<TEntity> : IGenericRepository<TEntity>
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<TEntity>> GetPagedAsync(int pageNumber, int pageSize, CancellationToken cancellationToken = default)
+    public async Task<IReadOnlyList<TEntity>> GetPagedAsync(
+        int pageNumber, int pageSize,
+        Expression<Func<TEntity, bool>>? predicate = default,
+        Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = default,
+        CancellationToken cancellationToken = default)
     {
         try
         {
             await using var newContext = new DbWikiContext(_context.Options);
             var newDbSet = newContext.Set<TEntity>();
-            return await newDbSet
-                .AsNoTracking()
+            var query = newDbSet.AsNoTracking();
+            if (predicate is not null)
+            {
+                query = query.Where(predicate);
+            }
+            if (orderBy is not null)
+            {
+                query = orderBy(query);
+            }
+
+            return await query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
                 .ToListAsync(cancellationToken)

@@ -4,7 +4,7 @@ using home_wiki_backend.DAL.Common.Models.Entities;
 
 namespace home_wiki_backend.DAL.Data;
 
-public class DbWikiContext : DbContext
+public sealed class DbWikiContext : DbContext
 {
     public DbWikiContext(DbContextOptions<DbWikiContext> options) :
         base(options)

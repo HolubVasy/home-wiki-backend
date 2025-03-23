@@ -15,7 +15,9 @@ namespace home_wiki_backend.DAL.Common.Contracts
         /// cancel the work.</param>
         /// <returns>A task that represents the asynchronous operation. The task result
         /// contains a collection of entities.</returns>
-        Task<IReadOnlyList<TEntity>> GetAsync(Expression<Func<TEntity, bool>> predicate,
+        Task<IReadOnlyList<TEntity>> GetAsync(
+            Expression<Func<TEntity, bool>>? predicate = default,
+            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -135,15 +137,17 @@ namespace home_wiki_backend.DAL.Common.Contracts
             = default);
 
         /// <summary>
-        /// Asynchronously gets a paginated collection of entities.
+        /// Asynchronously gets a paginated collection of entities that satisfy the specified predicate.
         /// </summary>
+        /// <param name="predicate">A function to test each element for a condition.</param>
         /// <param name="pageNumber">The page number to retrieve.</param>
         /// <param name="pageSize">The number of entities per page.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used to
-        /// cancel the work.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result
-        /// contains a paginated collection of entities.</returns>
-        Task<IReadOnlyList<TEntity>> GetPagedAsync(int pageNumber, int pageSize,
+        /// <param name="cancellationToken">A cancellation token that can be used to cancel the work.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains a paginated collection of entities.</returns>
+        Task<IReadOnlyList<TEntity>> GetPagedAsync(
+            int pageNumber, int pageSize,
+            Expression<Func<TEntity, bool>>? predicate = default,
+            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = default,
             CancellationToken cancellationToken = default);
     }
 }
