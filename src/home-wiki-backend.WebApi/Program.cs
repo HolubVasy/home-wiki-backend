@@ -7,8 +7,15 @@ using System.Reflection;
 
 namespace home_wiki_backend
 {
+    /// <summary>
+    /// The main entry point for the Home Wiki backend application.
+    /// </summary>
     public static class Program
     {
+        /// <summary>
+        /// The main method which configures and runs the web application.
+        /// </summary>
+        /// <param name="args">The command-line arguments.</param>
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
