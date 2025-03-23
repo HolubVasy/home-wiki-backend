@@ -21,10 +21,10 @@ public abstract class ModelBase : IEquatable<ModelBase>, IIdentifier,
     public DateTime CreatedAt { get; init; }
 
     /// <inheritdoc/>
-    public string? ModifiedBy { get; init; }
+    public string? ModifiedBy { get; set; }
 
     /// <inheritdoc/>
-    public DateTime? ModifiedAt { get; init; }
+    public DateTime? ModifiedAt { get; set; }
 
     /// <summary>
     ///     Determines whether the specified ModelBase is 
