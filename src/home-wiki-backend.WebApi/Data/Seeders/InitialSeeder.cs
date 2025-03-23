@@ -7,7 +7,7 @@ namespace home_wiki_backend.Seeders;
 public class InitialSeeder : ISeeder
 {
     private readonly DbWikiContext _context;
-
+    private readonly Random _random = new();
     public InitialSeeder(DbWikiContext context)
     {
         _context = context;
@@ -194,11 +194,13 @@ public class InitialSeeder : ISeeder
                 _ => Enumerable.Empty<Tag>()
             };
 
-            var selectedTags = matchedTags.OrderBy(_ => Guid.NewGuid()).Take(new Random().Next(0, 3)).ToHashSet();
+            var selectedTags = matchedTags
+                .OrderBy(_ => _random.Next())
+                .Take(_random.Next(0, 3))
+                .ToHashSet();
 
             var article = new Article
             {
-                Title = data.Title,
                 Name = data.Title,
                 Description = data.Description,
                 CategoryId = category.Id,
