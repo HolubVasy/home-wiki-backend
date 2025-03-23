@@ -6,11 +6,13 @@ namespace home_wiki_backend.DAL.Data;
 
 public class DbWikiContext : DbContext
 {
-    public DbWikiContext(DbContextOptions<DbWikiContext> options)
-        : base(options)
+    public DbWikiContext(DbContextOptions<DbWikiContext> options) :
+        base(options)
     {
+        Options = options;
     }
 
+    public DbContextOptions<DbWikiContext> Options { get; }
     public DbSet<Article> Articles { get; set; } = null!;
     public DbSet<Category> Categories { get; set; } = null!;
     public DbSet<Tag> Tags { get; set; } = null!;
