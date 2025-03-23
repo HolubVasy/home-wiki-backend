@@ -18,12 +18,12 @@
         /// <summary>
         /// Gets or sets the user who last modified this record.
         /// </summary>
-        string? ModifiedBy { get; init; }
+        string? ModifiedBy { get; set; }
 
         /// <summary>
         /// Gets or sets the date and time when this record was last modified.
         /// </summary>
-        DateTime? ModifiedAt { get; init; }
+        DateTime? ModifiedAt { get; set; }
     }
 }
 
