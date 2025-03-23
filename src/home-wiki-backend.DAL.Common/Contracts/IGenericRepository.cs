@@ -1,5 +1,7 @@
 ﻿using home_wiki_backend.DAL.Common.Models.Bases;
+using home_wiki_backend.DAL.Common.Models.Paginations;
 using System.Linq.Expressions;
+using X.PagedList;
 
 namespace home_wiki_backend.DAL.Common.Contracts
 {
@@ -127,16 +129,6 @@ namespace home_wiki_backend.DAL.Common.Contracts
         IQueryable<TEntity> GetQueryable();
 
         /// <summary>
-        /// Asynchronously gets all entities.
-        /// </summary>
-        /// <param name="cancellationToken">A cancellation token that can be used to
-        /// cancel the work.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result
-        /// contains a collection of all entities.</returns>
-        Task<IReadOnlyList<TEntity>> GetAllAsync(CancellationToken cancellationToken 
-            = default);
-
-        /// <summary>
         /// Asynchronously gets a paginated collection of entities that satisfy the specified predicate.
         /// </summary>
         /// <param name="predicate">A function to test each element for a condition.</param>
@@ -144,7 +136,7 @@ namespace home_wiki_backend.DAL.Common.Contracts
         /// <param name="pageSize">The number of entities per page.</param>
         /// <param name="cancellationToken">A cancellation token that can be used to cancel the work.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a paginated collection of entities.</returns>
-        Task<IReadOnlyList<TEntity>> GetPagedAsync(
+        Task<PagedList<TEntity>> GetPagedAsync(
             int pageNumber, int pageSize,
             Expression<Func<TEntity, bool>>? predicate = default,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = default,

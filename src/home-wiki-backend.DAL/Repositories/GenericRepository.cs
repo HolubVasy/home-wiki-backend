@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using home_wiki_backend.DAL.Common.Contracts;
 using home_wiki_backend.DAL.Common.Models.Bases;
+using home_wiki_backend.DAL.Common.Models.Paginations;
 using home_wiki_backend.DAL.Data;
 using home_wiki_backend.DAL.Exceptions;
 using Microsoft.EntityFrameworkCore;
@@ -264,26 +265,7 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
     }
 
     /// <inheritdoc/>
-    public async Task<IReadOnlyList<TEntity>> GetAllAsync(CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            await using var newContext = new DbWikiContext(_context.Options);
-            var newDbSet = newContext.Set<TEntity>();
-            return await newDbSet.AsNoTracking()
-                .ToListAsync(cancellationToken)
-                .ConfigureAwait(false);
-        }
-        catch (Exception ex)
-        {
-            throw new GenericRepositoryException(
-                $"An error occurred while retrieving all entities of type `{typeof(TEntity).Name}`.",
-                ex);
-        }
-    }
-
-    /// <inheritdoc/>
-    public async Task<IReadOnlyList<TEntity>> GetPagedAsync(
+    public async Task<PagedList<TEntity>> GetPagedAsync(
         int pageNumber, int pageSize,
         Expression<Func<TEntity, bool>>? predicate = default,
         Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = default,
@@ -303,11 +285,28 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
                 query = orderBy(query);
             }
 
-            return await query
+            var totalItemCountTask = query.CountAsync(cancellationToken);
+            var elementsTask = query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .ToListAsync(cancellationToken)
+                .ToListAsync(cancellationToken);
+
+            await Task.WhenAll(totalItemCountTask, elementsTask)
                 .ConfigureAwait(false);
+
+            var totalItemCount = await totalItemCountTask;
+            var elements = await elementsTask;
+
+            return new PagedList<TEntity>
+            {
+                PageCount = (int)Math.Ceiling(totalItemCount / (double)pageSize),
+                TotalItemCount = totalItemCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                HasPreviousPage = pageNumber > 1,
+                HasNextPage = pageNumber < (int)Math.Ceiling(totalItemCount / (double)pageSize),
+                Items = elements
+            };
         }
         catch (Exception ex)
         {
