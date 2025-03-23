@@ -1,4 +1,6 @@
+using home_wiki_backend.Contracts;
 using home_wiki_backend.DAL.Data;
+using home_wiki_backend.Seeders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 
@@ -9,7 +11,6 @@ namespace home_wiki_backend
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
-
             // Register DbContext with Azure SQL connection string
             var connectionString = builder.Configuration
                 .GetConnectionString("DefaultConnection");
@@ -41,6 +42,8 @@ namespace home_wiki_backend
 
             builder.Services.AddEndpointsApiExplorer();
 
+            builder.Services.AddScoped<ISeeder, InitialSeeder>();
+
             var app = builder.Build();
 
             // Auto-apply migrations
@@ -68,6 +71,19 @@ namespace home_wiki_backend
             app.UseAuthorization();
 
             app.MapControllers();
+
+            // Auto-apply migrations
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<DbWikiContext>();
+                db.Database.Migrate();
+
+                var seeder = scope.ServiceProvider.GetRequiredService<ISeeder>();
+                if (!seeder.AlreadySeeded())
+                {
+                    seeder.Seed();
+                }
+            }
 
             app.Run();
         }
