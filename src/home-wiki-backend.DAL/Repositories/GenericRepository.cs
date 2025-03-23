@@ -1,15 +1,15 @@
 ﻿using System.Linq.Expressions;
 using home_wiki_backend.DAL.Common.Contracts;
-using home_wiki_backend.DAL.Common.Models.Bases;
 using home_wiki_backend.DAL.Common.Models.Paginations;
 using home_wiki_backend.DAL.Data;
 using home_wiki_backend.DAL.Exceptions;
+using home_wiki_backend.Shared.Contracts;
 using Microsoft.EntityFrameworkCore;
 
 namespace home_wiki_backend.DAL.Repositories;
 
 public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity> 
-    where TEntity : ModelBase
+    where TEntity : class, IIdentifier, IName
 {
     private readonly DbWikiContext _context;
     private readonly DbSet<TEntity> _dbSet;

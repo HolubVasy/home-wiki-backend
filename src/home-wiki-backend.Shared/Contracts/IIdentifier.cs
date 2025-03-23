@@ -1,4 +1,4 @@
-﻿namespace home_wiki_backend.DAL.Common.Contracts;
+﻿namespace home_wiki_backend.Shared.Contracts;
 
 /// <summary>
 /// Enforces a model to have an identifier in a shape of integer value.

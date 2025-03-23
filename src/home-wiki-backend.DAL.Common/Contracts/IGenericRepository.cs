@@ -1,11 +1,10 @@
-﻿using home_wiki_backend.DAL.Common.Models.Bases;
-using home_wiki_backend.DAL.Common.Models.Paginations;
+﻿using home_wiki_backend.DAL.Common.Models.Paginations;
+using home_wiki_backend.Shared.Contracts;
 using System.Linq.Expressions;
-using X.PagedList;
 
 namespace home_wiki_backend.DAL.Common.Contracts
 {
-    public interface IGenericRepository<TEntity> where TEntity : ModelBase
+    public interface IGenericRepository<TEntity> where TEntity : class, IIdentifier, IName
     {
         /// <summary>
         /// Asynchronously gets a collection of entities that satisfy the specified

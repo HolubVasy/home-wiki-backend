@@ -1,25 +1,10 @@
 ﻿using home_wiki_backend.Shared.Contracts;
 using home_wiki_backend.Shared.Models;
 
-namespace home_wiki_backend.DAL.Common.Models.Entities
+namespace home_wiki_backend.BL.Common.Models.Requests
 {
-    /// <summary>
-    /// Represents a tag entity.
-    /// </summary>
-    public sealed class Tag : TagBase, IIdentifier, IAuditable
+    public sealed class CategoryResponse : CategoryBase, IAuditable
     {
-        /// <inheritdoc/>
-        public int Id { get; init; }
-
-        #region Entity relationships
-
-        /// <summary>
-        /// Gets the articles associated with the tag.
-        /// </summary>
-        public HashSet<Article>? Articles { get; init; }
-
-        #endregion
-
         #region Auditable properties
 
         /// <inheritdoc/>

@@ -1,36 +1,21 @@
 ﻿using home_wiki_backend.Shared.Contracts;
 using home_wiki_backend.Shared.Models;
 
-namespace home_wiki_backend.DAL.Common.Models.Entities
+namespace home_wiki_backend.BL.Common.Models.Requests
 {
-    /// <summary>
-    /// Represents an article entity.
-    /// </summary>
-    public sealed class Article : ArticleBase, IIdentifier, IAuditable
+    public sealed class ArticleResponse : ArticleBase, IAuditable
     {
-        #region Identity
-
-        /// <inheritdoc/>
-        public int Id { get; init; }
-
-        #endregion
-
         #region Entity relationships
-
-        /// <summary>
-        /// Gets the category ID of the article.
-        /// </summary>
-        public int CategoryId { get; init; }
 
         /// <summary>
         /// Gets the category of the article.
         /// </summary>
-        public Category Category { get; init; } = null!;
+        public CategoryBase Category { get; init; } = null!;
 
         /// <summary>
         /// Gets the tags associated with the article.
         /// </summary>
-        public HashSet<Tag>? Tags { get; init; }
+        public HashSet<TagBase>? Tags { get; init; }
 
         #endregion
 

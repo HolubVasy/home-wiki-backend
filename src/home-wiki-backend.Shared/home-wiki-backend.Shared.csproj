@@ -2,13 +2,9 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
-    <RootNamespace>home_wiki_backend.BL.Common</RootNamespace>
+    <RootNamespace>home_wiki_backend.Shared</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\home-wiki-backend.Shared\home-wiki-backend.Shared.csproj" />
-  </ItemGroup>
 
 </Project>

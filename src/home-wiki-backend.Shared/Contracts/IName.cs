@@ -1,4 +1,4 @@
-﻿namespace home_wiki_backend.DAL.Common.Contracts;
+﻿namespace home_wiki_backend.Shared.Contracts;
 
 /// <summary>
 ///     Represents the name of the entity.
