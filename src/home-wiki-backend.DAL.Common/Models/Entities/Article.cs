@@ -1,6 +1,6 @@
-﻿using home_wiki_backend.DAL.Common.Models.Base;
+﻿using home_wiki_backend.DAL.Common.Models.Bases;
 
-namespace home_wiki_backend.DAL.Models.Entities
+namespace home_wiki_backend.DAL.Common.Models.Entities
 {
     public sealed class Article : ModelBase
     {

@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using home_wiki_backend.DAL.Models.Entities;
 using HomeWiki.DAL.Resources.Constants;
 using home_wiki_backend.DAL.Configurations;
+using home_wiki_backend.DAL.Common.Models.Entities;
 
 namespace HomeWiki.DAL.EntitiesConfiguration;
 

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using home_wiki_backend.DAL.Models.Entities;
 using HomeWiki.DAL.EntitiesConfiguration;
+using home_wiki_backend.DAL.Common.Models.Entities;
 
 namespace home_wiki_backend.DAL.Data;
 
