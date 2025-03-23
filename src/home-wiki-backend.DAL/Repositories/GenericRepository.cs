@@ -91,13 +91,20 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
     }
 
     /// <inheritdoc/>
-    public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+    public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>>? predicate, CancellationToken cancellationToken = default)
     {
         try
         {
-            return await _dbSet
-                .AsNoTracking()
-                .AnyAsync(predicate, cancellationToken)
+
+            var query = _dbSet.AsNoTracking();
+
+            if (predicate is not null)
+            { 
+                query = query.Where(predicate);
+            }
+
+            return await query
+                .AnyAsync(cancellationToken)
                 .ConfigureAwait(false);
         }
         catch (Exception ex)

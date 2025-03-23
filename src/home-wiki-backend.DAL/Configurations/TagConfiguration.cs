@@ -14,6 +14,13 @@ public class TagConfiguration : IEntityTypeConfiguration<Tag>
 
         builder.HasKey(x => x.Id);
 
+        #region Indexes
+
+        builder.HasIndex(x => x.Name)
+            .IsUnique();
+
+        #endregion
+
         #region Columns
 
         builder.Property(x => x.Id)

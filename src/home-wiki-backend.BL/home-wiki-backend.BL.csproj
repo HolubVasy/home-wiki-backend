@@ -7,4 +7,10 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\home-wiki-backend.BL.Common\home-wiki-backend.BL.Common.csproj" />
+    <ProjectReference Include="..\home-wiki-backend.DAL.Common\home-wiki-backend.DAL.Common.csproj" />
+    <ProjectReference Include="..\home-wiki-backend.DAL\home-wiki-backend.DAL.csproj" />
+  </ItemGroup>
+
 </Project>

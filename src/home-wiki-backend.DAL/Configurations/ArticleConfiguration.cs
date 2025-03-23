@@ -32,6 +32,13 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 
         #endregion
 
+        #region Indexes
+
+        builder.HasIndex(x => x.Name)
+            .IsUnique();
+
+        #endregion
+
         #region Relations
 
         builder.HasOne(x => x.Category)

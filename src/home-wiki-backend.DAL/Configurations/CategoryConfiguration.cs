@@ -14,6 +14,13 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
 
         builder.HasKey(x => x.Id);
 
+        #region Indexes
+
+        builder.HasIndex(x => x.Name)
+            .IsUnique();
+
+        #endregion
+
         #region Columns
 
         builder.Property(x => x.Id)
