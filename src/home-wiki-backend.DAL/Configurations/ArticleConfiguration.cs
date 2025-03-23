@@ -21,9 +21,6 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
         builder.Property(x => x.Name)
             .IsRequired()
             .HasMaxLength(StringMaxLengths.Long);
-        builder.Property(x => x.Title)
-            .IsRequired()
-            .HasMaxLength(StringMaxLengths.Long);
         builder.Property(x => x.Description)
             .IsRequired()
             .HasMaxLength(StringMaxLengths.Huge);
@@ -44,8 +41,25 @@ public class ArticleConfiguration : IEntityTypeConfiguration<Article>
             .OnDelete(DeleteBehavior.Cascade);
         builder.HasMany(x => x.Tags)
             .WithMany(t => t.Articles)
-            .UsingEntity(j => j.ToTable(
-                TablesMetadata.ArticleTag.JoinTableName));
+            .UsingEntity<Dictionary<string, object>>(
+                TablesMetadata.ArticleTag.JoinTableName,
+                j => j
+                    .HasOne<Tag>()
+                    .WithMany()
+                    .HasForeignKey("TagId")
+                    .HasConstraintName(TablesMetadata.ArticleTag.ForeignKeyTag)
+                    .OnDelete(DeleteBehavior.Cascade),
+                j => j
+                    .HasOne<Article>()
+                    .WithMany()
+                    .HasForeignKey("ArticleId")
+                    .HasConstraintName(TablesMetadata.ArticleTag.ForeignKeyArticle)
+                    .OnDelete(DeleteBehavior.Cascade),
+                j =>
+                {
+                    j.HasKey("ArticleId", "TagId");
+                    j.ToTable(TablesMetadata.ArticleTag.JoinTableName);
+                });
 
         #endregion
     }
