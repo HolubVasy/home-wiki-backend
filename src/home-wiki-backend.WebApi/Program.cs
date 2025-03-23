@@ -77,11 +77,11 @@ namespace home_wiki_backend
                 var db = scope.ServiceProvider.GetRequiredService<DbWikiContext>();
                 db.Database.Migrate();
 
-                //var seeder = scope.ServiceProvider.GetRequiredService<ISeeder>();
-                //if (!seeder.AlreadySeeded())
-                //{
-                //    seeder.Seed();
-                //}
+                var seeder = scope.ServiceProvider.GetRequiredService<ISeeder>();
+                if (!seeder.AlreadySeeded())
+                {
+                    seeder.Seed();
+                }
             }
 
             app.Run();
