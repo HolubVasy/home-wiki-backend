@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "home-wiki-backend.DAL.Commo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "home-wiki-backend.DAL", "home-wiki-backend.DAL\home-wiki-backend.DAL.csproj", "{A2CDEC38-16B1-4FD0-BE66-38EE74F262B5}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "home-wiki-backend.BL.Common", "home-wiki-backend.BL.Common\home-wiki-backend.BL.Common.csproj", "{577436F2-EB4C-4F19-B326-903B7DF3424C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "home-wiki-backend.BL", "home-wiki-backend.BL\home-wiki-backend.BL.csproj", "{777C86C8-232C-4B20-A291-65F6566FB486}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +31,14 @@ Global
 		{A2CDEC38-16B1-4FD0-BE66-38EE74F262B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A2CDEC38-16B1-4FD0-BE66-38EE74F262B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A2CDEC38-16B1-4FD0-BE66-38EE74F262B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{577436F2-EB4C-4F19-B326-903B7DF3424C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{577436F2-EB4C-4F19-B326-903B7DF3424C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{577436F2-EB4C-4F19-B326-903B7DF3424C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{577436F2-EB4C-4F19-B326-903B7DF3424C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{777C86C8-232C-4B20-A291-65F6566FB486}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{777C86C8-232C-4B20-A291-65F6566FB486}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{777C86C8-232C-4B20-A291-65F6566FB486}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{777C86C8-232C-4B20-A291-65F6566FB486}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
