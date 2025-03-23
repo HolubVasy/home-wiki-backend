@@ -3,6 +3,7 @@ using home_wiki_backend.DAL.Data;
 using home_wiki_backend.Seeders;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 namespace home_wiki_backend
 {
@@ -38,6 +39,8 @@ namespace home_wiki_backend
                     Title = "Home Wiki API",
                     Description = "API documentation for the Home Wiki backend"
                 });
+                var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
             });
 
             builder.Services.AddEndpointsApiExplorer();
@@ -72,17 +75,7 @@ namespace home_wiki_backend
             app.MapControllers();
 
             // Auto-apply migrations
-            using (var scope = app.Services.CreateScope())
-            {
-                var db = scope.ServiceProvider.GetRequiredService<DbWikiContext>();
-                db.Database.Migrate();
-
-                var seeder = scope.ServiceProvider.GetRequiredService<ISeeder>();
-                if (!seeder.AlreadySeeded())
-                {
-                    seeder.Seed();
-                }
-            }
+            app.ApplyMigrationsAndSeed();
 
             app.Run();
         }
