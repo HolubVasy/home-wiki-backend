@@ -13,10 +13,20 @@ public class TagConfiguration : IEntityTypeConfiguration<Tag>
         builder.ToTable(TablesMetadata.Tag.Name);
 
         builder.HasKey(x => x.Id);
+
+        #region Columns
+
         builder.Property(x => x.Id)
             .HasColumnName(TablesMetadata.Tag.PrimaryKeyName);
         builder.Property(x => x.Name)
             .IsRequired()
             .HasMaxLength(StringMaxLengths.Long);
+        builder.Property(x => x.CreatedBy)
+            .IsRequired()
+            .HasMaxLength(StringMaxLengths.Short50);
+        builder.Property(x => x.ModifiedBy)
+            .HasMaxLength(StringMaxLengths.Short50);
+
+        #endregion
     }
 }

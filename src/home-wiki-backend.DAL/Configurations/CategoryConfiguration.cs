@@ -13,10 +13,20 @@ public class CategoryConfiguration : IEntityTypeConfiguration<Category>
         builder.ToTable(TablesMetadata.Category.Name);
 
         builder.HasKey(x => x.Id);
+
+        #region Columns
+
         builder.Property(x => x.Id)
             .HasColumnName(TablesMetadata.Category.PrimaryKeyName);
         builder.Property(x => x.Name)
             .IsRequired()
             .HasMaxLength(StringMaxLengths.Long);
+        builder.Property(x => x.CreatedBy)
+            .IsRequired()
+            .HasMaxLength(StringMaxLengths.Short50);
+        builder.Property(x => x.ModifiedBy)
+            .HasMaxLength(StringMaxLengths.Short50);
+
+        #endregion
     }
 }
