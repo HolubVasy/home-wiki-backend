@@ -1,6 +1,6 @@
 ﻿using home_wiki_backend.DAL.Common.Contracts;
 
-namespace home_wiki_backend.DAL.Common.Models;
+namespace home_wiki_backend.DAL.Common.Models.Base;
 
 /// <summary>
 ///     Represents the base entity in the application.
