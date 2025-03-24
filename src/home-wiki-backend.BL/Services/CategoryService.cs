@@ -369,7 +369,7 @@ namespace home_wiki_backend.BL.Services
         {
             try
             {
-                return await _catRepo.AnyAsync(c => c.Id == id,
+                return await _catRepo.ExistsAsync(c => c.Id == id,
                     cancellationToken);
             }
             catch (Exception ex)
@@ -389,7 +389,7 @@ namespace home_wiki_backend.BL.Services
             try
             {
                 var pred = predicate?.ConvertTo<CategoryRequest, Category>();
-                return await _catRepo.AnyAsync(pred, cancellationToken);
+                return await _catRepo.ExistsAsync(pred, cancellationToken);
             }
             catch (Exception ex)
             {

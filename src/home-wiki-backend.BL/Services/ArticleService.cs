@@ -321,6 +321,19 @@ namespace home_wiki_backend.BL.Services
             try
             {
                 _logger.LogInformation("Deleting article ID: {Id}", id);
+                var exists = await _articleRepo.ExistsAsync(a => a.Id == id, cancellationToken);
+                if (!exists)
+                {
+                    var errorMessage = $"Article with ID: {id} not exists";
+                    _logger.LogInformation(errorMessage);
+                    return new ResultModel<ArticleResponse>
+                    {
+                        Success = false,
+                        Message = errorMessage,
+                        Code = StatusCodes.Status404NotFound,
+                        Data = null
+                    };
+                }
                 await _articleRepo.RemoveAsync(a => a.Id == id, cancellationToken);
                 return new ResultModel<ArticleResponse>
                 {
@@ -332,11 +345,12 @@ namespace home_wiki_backend.BL.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting article ID: {Id}", id);
+                var errorMessage = $"Error deleting article ID: {id}";
+                _logger.LogError(ex, errorMessage);
                 return new ResultModel<ArticleResponse>
                 {
                     Success = false,
-                    Message = "Error deleting article",
+                    Message = errorMessage,
                     Code = StatusCodes.Status500InternalServerError,
                     Error = new ErrorResultModel(ex.Message, ErrorCode.Unexpected)
                 };
@@ -381,7 +395,7 @@ namespace home_wiki_backend.BL.Services
         {
             try
             {
-                return await _articleRepo.AnyAsync(a => a.Id == id, cancellationToken);
+                return await _articleRepo.ExistsAsync(a => a.Id == id, cancellationToken);
             }
             catch (Exception ex)
             {
@@ -398,7 +412,7 @@ namespace home_wiki_backend.BL.Services
             try
             {
                 var artPred = predicate?.ConvertTo<ArticleRequest, Article>();
-                return await _articleRepo.AnyAsync(artPred, cancellationToken);
+                return await _articleRepo.ExistsAsync(artPred, cancellationToken);
             }
             catch (Exception ex)
             {

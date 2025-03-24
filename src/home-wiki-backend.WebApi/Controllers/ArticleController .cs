@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using home_wiki_backend.BL.Common.Contracts.Services;
 using home_wiki_backend.BL.Common.Models.Requests;
-using home_wiki_backend.Shared.Models.Results.Generic;
 
 namespace home_wiki_backend.Controllers
 {
@@ -29,16 +28,16 @@ namespace home_wiki_backend.Controllers
         /// <param name="article">The article request model.</param>
         /// <returns>A result model containing the created article response.</returns>
         [HttpPost]
-        [ProducesResponseType(typeof(ResultModel<ArticleResponse>), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(ResultModel<ArticleResponse>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Create([FromBody] ArticleRequest article)
+        [ProducesResponseType(typeof(ArticleResponse), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ArticleResponse), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ArticleResponse>> Create([FromBody] ArticleRequest article)
         {
             var result = await _articleService.CreateAsync(article);
             if (result.Success)
             {
-                return CreatedAtAction(nameof(GetById), new { id = result.Data?.Id }, result);
+                return CreatedAtAction(nameof(GetById), new { id = result.Data?.Id }, result.Data);
             }
-            return StatusCode(result.Code, result);
+            return StatusCode(result.Code, result.Data);
         }
 
         /// <summary>
@@ -47,16 +46,16 @@ namespace home_wiki_backend.Controllers
         /// <param name="id">The article identifier.</param>
         /// <returns>A result model containing the article response.</returns>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(ResultModel<ArticleResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ResultModel<ArticleResponse>), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> GetById(int id)
+        [ProducesResponseType(typeof(ArticleResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ArticleResponse), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ArticleResponse>> GetById(int id)
         {
             var result = await _articleService.GetByIdAsync(id);
             if (result.Success)
             {
-                return Ok(result);
+                return Ok(result.Data);
             }
-            return NotFound(result);
+            return NotFound(result.Data);
         }
 
         /// <summary>
@@ -67,9 +66,9 @@ namespace home_wiki_backend.Controllers
         /// </remarks>
         /// <returns>A result model containing a list of article responses.</returns>
         [HttpGet]
-        [ProducesResponseType(typeof(ResultModels<ArticleResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ResultModels<ArticleResponse>), StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetAll()
+        [ProducesResponseType(typeof(IList<ArticleResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IList<ArticleResponse>), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<IList<ArticleResponse>>> GetAll()
         {
             // Here we call GetAsync without a predicate.
             var result = await _articleService.GetAsync();
@@ -77,7 +76,7 @@ namespace home_wiki_backend.Controllers
             {
                 return Ok(result);
             }
-            return StatusCode(result.Code, result);
+            return StatusCode(result.Code, result.Data);
         }
 
         /// <summary>
@@ -86,16 +85,16 @@ namespace home_wiki_backend.Controllers
         /// <param name="article">The article request model.</param>
         /// <returns>A result model containing the updated article response.</returns>
         [HttpPut]
-        [ProducesResponseType(typeof(ResultModel<ArticleResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ResultModel<ArticleResponse>), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Update([FromBody] ArticleRequest article)
+        [ProducesResponseType(typeof(ArticleResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ArticleResponse), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ArticleResponse>> Update([FromBody] ArticleRequest article)
         {
             var result = await _articleService.UpdateAsync(article);
             if (result.Success)
             {
-                return Ok(result);
+                return Ok(result.Data);
             }
-            return StatusCode(result.Code, result);
+            return StatusCode(result.Code, result.Data);
         }
 
         /// <summary>
@@ -104,16 +103,16 @@ namespace home_wiki_backend.Controllers
         /// <param name="id">The article identifier.</param>
         /// <returns>A result model indicating the deletion result.</returns>
         [HttpDelete("{id}")]
-        [ProducesResponseType(typeof(ResultModel<ArticleResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ResultModel<ArticleResponse>), StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Delete(int id)
+        [ProducesResponseType(typeof(ArticleResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ArticleResponse), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ArticleResponse>> Delete(int id)
         {
             var result = await _articleService.DeleteAsync(id);
             if (result.Success)
             {
-                return Ok(result);
+                return Ok(result.Data);
             }
-            return StatusCode(result.Code, result);
+            return StatusCode(result.Code, result.Data);
         }
 
         /// <summary>
@@ -122,15 +121,15 @@ namespace home_wiki_backend.Controllers
         /// <param name="article">The article request model.</param>
         /// <returns>A result model indicating the removal result.</returns>
         [HttpPost("remove")]
-        [ProducesResponseType(typeof(ResultModel<ArticleResponse>), StatusCodes.Status200OK)]
-        public async Task<IActionResult> Remove([FromBody] ArticleRequest article)
+        [ProducesResponseType(typeof(ArticleResponse), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ArticleResponse>> Remove([FromBody] ArticleRequest article)
         {
             var result = await _articleService.RemoveAsync(article);
             if (result.Success)
             {
-                return Ok(result);
+                return Ok(result.Data);
             }
-            return StatusCode(result.Code, result);
+            return StatusCode(result.Code, result.Data);
         }
     }
 }

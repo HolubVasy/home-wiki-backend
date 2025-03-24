@@ -42,7 +42,7 @@ namespace home_wiki_backend.DAL.Common.Contracts
         /// cancel the work.</param>
         /// <returns>A task that represents the asynchronous operation. The task result
         /// contains true if any entity satisfies the predicate; otherwise, false.</returns>
-        Task<bool> AnyAsync(Expression<Func<TEntity, bool>>? predicate,
+        Task<bool> ExistsAsync(Expression<Func<TEntity, bool>>? predicate,
             CancellationToken cancellationToken = default);
 
         /// <summary>

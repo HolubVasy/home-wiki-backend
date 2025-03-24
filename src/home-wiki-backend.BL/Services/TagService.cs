@@ -356,7 +356,7 @@ namespace home_wiki_backend.BL.Services
         {
             try
             {
-                return await _tagRepo.AnyAsync(t => t.Id == id,
+                return await _tagRepo.ExistsAsync(t => t.Id == id,
                     cancellationToken);
             }
             catch (Exception ex)
@@ -375,7 +375,7 @@ namespace home_wiki_backend.BL.Services
             try
             {
                 var pred = predicate?.ConvertTo<TagRequest, Tag>();
-                return await _tagRepo.AnyAsync(pred, cancellationToken);
+                return await _tagRepo.ExistsAsync(pred, cancellationToken);
             }
             catch (Exception ex)
             {

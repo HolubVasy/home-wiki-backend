@@ -100,7 +100,7 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
     }
 
     /// <inheritdoc/>
-    public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>>? predicate, CancellationToken cancellationToken = default)
+    public async Task<bool> ExistsAsync(Expression<Func<TEntity, bool>>? predicate, CancellationToken cancellationToken = default)
     {
         try
         {
