@@ -154,5 +154,12 @@ namespace home_wiki_backend.DAL.Common.Contracts
             Expression<Func<TEntity, bool>>? predicate = default,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderBy = default,
             CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Asynchronously gets a list of entities that satisfy the specified specification.
+        /// </summary>
+        Task<IReadOnlyList<TEntity>> ListAsync(
+            ISpecification<TEntity> specification,
+            CancellationToken cancellationToken = default);
     }
 }

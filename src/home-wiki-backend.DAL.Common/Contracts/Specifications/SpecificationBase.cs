@@ -54,7 +54,8 @@ public abstract class SpecificationBase<T> : ISpecification<T>
     /// Applies a descending order by expression.
     /// </summary>
     /// <param name="orderByDescendingExpression">The order by descending expression.</param>
-    protected void ApplyOrderByDescending(Expression<Func<T, object>> orderByDescendingExpression)
+    protected void ApplyOrderByDescending(Expression<Func<T, object>> 
+        orderByDescendingExpression)
     {
         OrderByDescending = orderByDescendingExpression;
     }

@@ -2,6 +2,7 @@
 using home_wiki_backend.DAL.Common.Contracts;
 using home_wiki_backend.DAL.Data;
 using home_wiki_backend.DAL.Exceptions;
+using home_wiki_backend.DAL.Specifications;
 using home_wiki_backend.Shared.Contracts;
 using home_wiki_backend.Shared.Models;
 using Microsoft.EntityFrameworkCore;
@@ -351,6 +352,25 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
     {
         await RemoveEntityAsync(entity, cancellationToken)
             .ConfigureAwait(false);
+    }
+
+    /// <inheritdoc/>
+    public async Task<IReadOnlyList<TEntity>> ListAsync(
+        ISpecification<TEntity> specification,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var query = SpecificationEvaluator<TEntity>.GetQuery(_dbSet.AsNoTracking(), specification);
+            return await query.ToListAsync(cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            throw new GenericRepositoryException(
+                $"An error occurred while retrieving entities of type" +
+                $" `{typeof(TEntity).Name}` using a specification.", ex);
+        }
     }
 
     private async Task RemoveEntityAsync(TEntity? entity,
