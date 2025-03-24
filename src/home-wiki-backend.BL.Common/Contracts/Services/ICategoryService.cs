@@ -1,11 +1,12 @@
-﻿using home_wiki_backend.BL.Common.Models.Requests;
+﻿using System.Linq.Expressions;
+using home_wiki_backend.BL.Common.Models.Requests;
+using home_wiki_backend.Shared.Models.Results.Generic;
 using home_wiki_backend.DAL.Common.Models.Entities;
-using System.Linq.Expressions;
 
 namespace home_wiki_backend.BL.Common.Contracts.Services
 {
     /// <summary>
-    /// Defines the contract for category service operations.
+    /// Defines the contract for category-related operations.
     /// </summary>
     public interface ICategoryService
     {
@@ -13,114 +14,129 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// Creates a new category asynchronously.
         /// </summary>
         /// <param name="category">The category request model.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the created category response.</returns>
-        Task<CategoryResponse> CreateAsync(CategoryRequest category,
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A result model containing the created category response.</returns>
+        Task<ResultModel<CategoryResponse>> CreateAsync(
+            CategoryRequest category,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets an category by its identifier asynchronously.
+        /// Gets a category by its ID asynchronously.
         /// </summary>
-        /// <param name="id">The identifier of the category.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the category response.</returns>
-        Task<CategoryResponse> GetByIdAsync(int id,
+        /// <param name="id">The category ID.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A result model containing the category response.</returns>
+        Task<ResultModel<CategoryResponse>> GetByIdAsync(
+            int id,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets a collection of categories that match the specified criteria asynchronously.
+        /// Gets categories based on a predicate and order asynchronously.
         /// </summary>
-        /// <param name="predicate">An expression to filter the categories.</param>
-        /// <param name="orderBy">A function to order the categories.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a collection of category responses.</returns>
-        Task<IEnumerable<CategoryResponse>> GetAsync(
+        /// <param name="predicate">The predicate to filter categories.</param>
+        /// <param name="orderBy">The function to order categories.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A result model containing the list of category responses.
+        /// </returns>
+        Task<ResultModels<CategoryResponse>> GetAsync(
             Expression<Func<CategoryRequest, bool>>? predicate = default,
-            Func<IQueryable<CategoryRequest>, IOrderedQueryable<CategoryRequest>>? orderBy = default,
+            Func<IQueryable<CategoryRequest>, 
+                IOrderedQueryable<CategoryRequest>>? orderBy = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets a paged collection of categories that match the specified criteria asynchronously.
+        /// Gets paged categories based on a predicate and order asynchronously.
         /// </summary>
         /// <param name="pageNumber">The page number.</param>
-        /// <param name="pageSize">The size of the page.</param>
-        /// <param name="predicate">An expression to filter the categories.</param>
-        /// <param name="orderBy">A function to order the categories.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a collection of category responses.</returns>
-        Task<IEnumerable<CategoryResponse>> GetPagedAsync(
+        /// <param name="pageSize">The page size.</param>
+        /// <param name="predicate">The predicate to filter categories.</param>
+        /// <param name="orderBy">The function to order categories.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A result model containing the list of paged category 
+        /// responses.</returns>
+        Task<ResultModels<CategoryResponse>> GetPagedAsync(
             int pageNumber, int pageSize,
             Expression<Func<CategoryRequest, bool>>? predicate = default,
-            Func<IQueryable<CategoryRequest>, IOrderedQueryable<CategoryRequest>>? orderBy = default,
+            Func<IQueryable<CategoryRequest>, 
+                IOrderedQueryable<CategoryRequest>>? orderBy = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Updates an existing category asynchronously.
+        /// Updates a category asynchronously.
         /// </summary>
         /// <param name="category">The category request model.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the updated category response.</returns>
-        Task<CategoryResponse> UpdateAsync(CategoryRequest category,
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A result model containing the updated category 
+        /// response.</returns>
+        Task<ResultModel<CategoryResponse>> UpdateAsync(
+            CategoryRequest category,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Deletes an category by its identifier asynchronously.
+        /// Deletes a category by its ID asynchronously.
         /// </summary>
-        /// <param name="id">The identifier of the category.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        Task DeleteAsync(int id,
+        /// <param name="id">The category ID.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A result model containing the deleted category response
+        /// .</returns>
+        Task<ResultModel<CategoryResponse>> DeleteAsync(
+            int id,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Deletes an category asynchronously.
+        /// Removes a category asynchronously.
         /// </summary>
         /// <param name="category">The category request model.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        Task RemoveAsync(CategoryRequest category,
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A result model containing the removed category
+        /// response.</returns>
+        Task<ResultModel<CategoryResponse>> RemoveAsync(
+            CategoryRequest category,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Checks if an category exists by its identifier asynchronously.
+        /// Checks if a category exists by its ID asynchronously.
         /// </summary>
-        /// <param name="id">The identifier of the category.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a boolean value indicating whether the category exists.</returns>
-        Task<bool> ExistsAsync(int id,
+        /// <param name="id">The category ID.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A boolean indicating whether the category
+        /// exists.</returns>
+        Task<bool> ExistsAsync(
+            int id,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Checks if any categories match the specified criteria asynchronously.
+        /// Checks if any category matches the predicate asynchronously.
         /// </summary>
-        /// <param name="predicate">An expression to filter the categories.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a boolean value indicating whether any categories match the criteria.</returns>
+        /// <param name="predicate">The predicate to filter categories.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A boolean indicating whether any category 
+        /// matches the predicate.</returns>
         Task<bool> AnyAsync(
             Expression<Func<CategoryRequest, bool>>? predicate = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets the first category that matches the specified criteria asynchronously.
+        /// Gets the first category that matches the predicate asynchronously.
         /// </summary>
-        /// <param name="predicate">An expression to filter the categories.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. 
-        /// The task result contains the first category response that matches the criteria or null if no category matches.</returns>
-        Task<CategoryResponse?> FirstOrDefault(Expression<Func<CategoryRequest, bool>>? 
-            predicate = default,
+        /// <param name="predicate">The predicate to filter categories.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A result model containing the first matching
+        /// category response.</returns>
+        Task<ResultModel<CategoryResponse>> FirstOrDefault(
+            Expression<Func<CategoryRequest, bool>>? predicate = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets a collection of articles based on the given specification.
+        /// Gets a list of categories based on a specification asynchronously.
         /// </summary>
-        /// <param name="specification">The specification to filter and include related data.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task representing the asynchronous operation that returns
-        /// a collection of article responses.</returns>
-        Task<IEnumerable<CategoryResponse>> GetListAsync(
+        /// <param name="specification">The specification to filter 
+        /// categories.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A result model containing the list of category 
+        /// responses.</returns>
+        Task<ResultModels<CategoryResponse>> GetListAsync(
             ISpecification<Category> specification,
             CancellationToken cancellationToken = default);
-
     }
 }

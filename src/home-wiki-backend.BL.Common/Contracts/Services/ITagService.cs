@@ -1,125 +1,142 @@
-﻿using home_wiki_backend.BL.Common.Models.Requests;
+﻿using System.Linq.Expressions;
+using home_wiki_backend.BL.Common.Models.Requests;
+using home_wiki_backend.Shared.Models.Results.Generic;
 using home_wiki_backend.DAL.Common.Models.Entities;
-using System.Linq.Expressions;
 
 namespace home_wiki_backend.BL.Common.Contracts.Services
 {
     /// <summary>
-    /// Defines the contract for tag service operations.
+    /// Provides methods for managing tags.
     /// </summary>
     public interface ITagService
     {
         /// <summary>
-        /// Creates a new tag asynchronously.
+        /// Creates a new tag.
         /// </summary>
         /// <param name="tag">The tag request model.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the created tag response.</returns>
-        Task<TagResponse> CreateAsync(TagRequest tag,
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The result model containing the created tag response.
+        /// </returns>
+        Task<ResultModel<TagResponse>> CreateAsync(
+            TagRequest tag,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets an tag by its identifier asynchronously.
+        /// Gets a tag by its identifier.
         /// </summary>
-        /// <param name="id">The identifier of the tag.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the tag response.</returns>
-        Task<TagResponse> GetByIdAsync(int id,
+        /// <param name="id">The tag identifier.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The result model containing the tag response.</returns>
+        Task<ResultModel<TagResponse>> GetByIdAsync(
+            int id,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets a collection of tags that match the specified criteria asynchronously.
+        /// Gets tags based on a predicate and order.
         /// </summary>
-        /// <param name="predicate">An expression to filter the tags.</param>
-        /// <param name="orderBy">A function to order the tags.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a collection of tag responses.</returns>
-        Task<IEnumerable<TagResponse>> GetAsync(
+        /// <param name="predicate">The predicate to filter tags.</param>
+        /// <param name="orderBy">The function to order tags.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The result models containing the tag responses.
+        /// </returns>
+        Task<ResultModels<TagResponse>> GetAsync(
             Expression<Func<TagRequest, bool>>? predicate = default,
-            Func<IQueryable<TagRequest>, IOrderedQueryable<TagRequest>>? orderBy = default,
+            Func<IQueryable<TagRequest>, 
+                IOrderedQueryable<TagRequest>>? orderBy = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets a paged collection of tags that match the specified criteria asynchronously.
+        /// Gets paged tags based on a predicate and order.
         /// </summary>
         /// <param name="pageNumber">The page number.</param>
-        /// <param name="pageSize">The size of the page.</param>
-        /// <param name="predicate">An expression to filter the tags.</param>
-        /// <param name="orderBy">A function to order the tags.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a collection of tag responses.</returns>
-        Task<IEnumerable<TagResponse>> GetPagedAsync(
+        /// <param name="pageSize">The page size.</param>
+        /// <param name="predicate">The predicate to filter tags.</param>
+        /// <param name="orderBy">The function to order tags.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The result models containing the tag responses.</returns>
+        Task<ResultModels<TagResponse>> GetPagedAsync(
             int pageNumber, int pageSize,
             Expression<Func<TagRequest, bool>>? predicate = default,
-            Func<IQueryable<TagRequest>, IOrderedQueryable<TagRequest>>? orderBy = default,
+            Func<IQueryable<TagRequest>, 
+                IOrderedQueryable<TagRequest>>? orderBy = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Updates an existing tag asynchronously.
+        /// Updates an existing tag.
         /// </summary>
         /// <param name="tag">The tag request model.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the updated tag response.</returns>
-        Task<TagResponse> UpdateAsync(TagRequest tag,
+        /// <param name="cancellationToken">The cancellation token.
+        /// </param>
+        /// <returns>The result model containing the updated tag 
+        /// response.</returns>
+        Task<ResultModel<TagResponse>> UpdateAsync(
+            TagRequest tag,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Deletes an tag by its identifier asynchronously.
+        /// Deletes a tag by its identifier.
         /// </summary>
-        /// <param name="id">The identifier of the tag.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        Task DeleteAsync(int id,
+        /// <param name="id">The tag identifier.</param>
+        /// <param name="cancellationToken">The cancellation token.
+        /// </param>
+        /// <returns>The result model containing the deleted tag 
+        /// response.</returns>
+        Task<ResultModel<TagResponse>> DeleteAsync(
+            int id,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Deletes an tag asynchronously.
+        /// Removes a tag.
         /// </summary>
         /// <param name="tag">The tag request model.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        Task RemoveAsync(TagRequest tag,
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The result model containing the removed tag 
+        /// response.</returns>
+        Task<ResultModel<TagResponse>> RemoveAsync(
+            TagRequest tag,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Checks if an tag exists by its identifier asynchronously.
+        /// Checks if a tag exists by its identifier.
         /// </summary>
-        /// <param name="id">The identifier of the tag.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a boolean value indicating whether the tag exists.</returns>
-        Task<bool> ExistsAsync(int id,
+        /// <param name="id">The tag identifier.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>True if the tag exists, otherwise false.</returns>
+        Task<bool> ExistsAsync(
+            int id,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Checks if any tags match the specified criteria asynchronously.
+        /// Checks if any tags match the given predicate.
         /// </summary>
-        /// <param name="predicate">An expression to filter the tags.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a boolean value indicating whether any tags match the criteria.</returns>
+        /// <param name="predicate">The predicate to filter tags.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>True if any tags match the predicate, otherwise
+        /// false.</returns>
         Task<bool> AnyAsync(
             Expression<Func<TagRequest, bool>>? predicate = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets the first tag that matches the specified criteria asynchronously.
+        /// Gets the first tag that matches the given predicate.
         /// </summary>
-        /// <param name="predicate">An expression to filter the tags.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. 
-        /// The task result contains the first tag response that matches the criteria or null if no tag matches.</returns>
-        Task<TagResponse?> FirstOrDefault(Expression<Func<TagRequest, bool>>? 
-            predicate = default,
+        /// <param name="predicate">The predicate to filter tags.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The result model containing the first matching
+        /// tag response.</returns>
+        Task<ResultModel<TagResponse>> FirstOrDefault(
+            Expression<Func<TagRequest, bool>>? predicate = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets a collection of tags based on the given specification.
+        /// Gets a list of tags based on a specification.
         /// </summary>
-        /// <param name="specification">The specification to filter and include related data.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task representing the asynchronous operation that returns a collection of tags responses.</returns>
-        Task<IEnumerable<TagResponse>> GetListAsync(
+        /// <param name="specification">The specification to filter 
+        /// tags.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The result models containing the tag responses.</returns>
+        Task<ResultModels<TagResponse>> GetListAsync(
             ISpecification<Tag> specification,
             CancellationToken cancellationToken = default);
-
     }
 }

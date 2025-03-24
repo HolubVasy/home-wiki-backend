@@ -1,14 +1,18 @@
 ﻿using System.Linq.Expressions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using home_wiki_backend.BL.Common.Contracts.Services;
 using home_wiki_backend.BL.Common.Models.Requests;
 using home_wiki_backend.DAL.Common.Contracts;
 using home_wiki_backend.DAL.Common.Models.Entities;
-using home_wiki_backend.DAL.Exceptions;
+using home_wiki_backend.Shared.Models.Results.Generic;
+using home_wiki_backend.Shared.Enums;
 using home_wiki_backend.Shared.Helpers;
+using home_wiki_backend.Shared.Models.Results.Errors;
 
 namespace home_wiki_backend.BL.Services
 {
+    /// <inheritdoc/>
     public sealed class CategoryService : ICategoryService
     {
         private readonly IGenericRepository<Category> _catRepo;
@@ -22,7 +26,8 @@ namespace home_wiki_backend.BL.Services
             _logger = logger;
         }
 
-        public async Task<CategoryResponse> CreateAsync(
+        /// <inheritdoc/>
+        public async Task<ResultModel<CategoryResponse>> CreateAsync(
             CategoryRequest category,
             CancellationToken cancellationToken = default)
         {
@@ -33,64 +38,100 @@ namespace home_wiki_backend.BL.Services
                 var newCat = new Category
                 {
                     Name = category.Name,
-                    CreatedBy = "system", // Replace as needed.
+                    CreatedBy = "system",
                     CreatedAt = DateTime.UtcNow
                 };
-                var created = await _catRepo.AddAsync(newCat,
+                var created = await _catRepo.AddAsync(newCat, 
                     cancellationToken);
                 _logger.LogInformation("Category created with ID: {Id}",
                     created.Id);
-                return new CategoryResponse
+                return new ResultModel<CategoryResponse>
                 {
-                    Id = created.Id,
-                    Name = created.Name,
-                    CreatedBy = created.CreatedBy,
-                    CreatedAt = created.CreatedAt,
-                    ModifiedBy = created.ModifiedBy,
-                    ModifiedAt = created.ModifiedAt
+                    Success = true,
+                    Message = "Category created successfully",
+                    Code = StatusCodes.Status201Created,
+                    Data = new CategoryResponse
+                    {
+                        Id = created.Id,
+                        Name = created.Name,
+                        CreatedBy = created.CreatedBy,
+                        CreatedAt = created.CreatedAt,
+                        ModifiedBy = created.ModifiedBy,
+                        ModifiedAt = created.ModifiedAt
+                    }
                 };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating category: {Name}",
                     category.Name);
-                throw new CategoryServiceException("Error creating category", ex);
+                return new ResultModel<CategoryResponse>
+                {
+                    Success = false,
+                    Message = "Error creating category",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message,
+                    ErrorCode.Unexpected)
+                };
             }
         }
 
-        public async Task<CategoryResponse> GetByIdAsync(
+        /// <inheritdoc/>
+        public async Task<ResultModel<CategoryResponse>> GetByIdAsync(
             int id,
             CancellationToken cancellationToken = default)
         {
             try
             {
                 _logger.LogInformation("Getting category by ID: {Id}", id);
-                var cat = await _catRepo.FirstOrDefaultAsync(
-                    c => c.Id == id, cancellationToken);
+                var cat = await _catRepo.FirstOrDefaultAsync(c => c.Id == id,
+                    cancellationToken);
                 if (cat == null)
                 {
-                    _logger.LogWarning("Category with ID {Id} not found.", id);
-                    throw new KeyNotFoundException(
-                        $"Category with ID {id} not found.");
+                    _logger.LogWarning("Category with ID {Id} " +
+                        "not found.", id);
+                    return new ResultModel<CategoryResponse>
+                    {
+                        Success = false,
+                        Message = $"Category with ID {id} not found.",
+                        Code = StatusCodes.Status404NotFound,
+                        Error = new ErrorResultModel("Not found", 
+                        ErrorCode.Unexpected)
+                    };
                 }
-                return new CategoryResponse
+                return new ResultModel<CategoryResponse>
                 {
-                    Id = cat.Id,
-                    Name = cat.Name,
-                    CreatedBy = cat.CreatedBy,
-                    CreatedAt = cat.CreatedAt,
-                    ModifiedBy = cat.ModifiedBy,
-                    ModifiedAt = cat.ModifiedAt
+                    Success = true,
+                    Message = "Category retrieved successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = new CategoryResponse
+                    {
+                        Id = cat.Id,
+                        Name = cat.Name,
+                        CreatedBy = cat.CreatedBy,
+                        CreatedAt = cat.CreatedAt,
+                        ModifiedBy = cat.ModifiedBy,
+                        ModifiedAt = cat.ModifiedAt
+                    }
                 };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting category by ID: {Id}", id);
-                throw new CategoryServiceException("Error retrieving category", ex);
+                _logger.LogError(ex, "Error retrieving category by ID:" +
+                    " {Id}", id);
+                return new ResultModel<CategoryResponse>
+                {
+                    Success = false,
+                    Message = "Error retrieving category by ID",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message,
+                    ErrorCode.Unexpected)
+                };
             }
         }
 
-        public async Task<IEnumerable<CategoryResponse>> GetAsync(
+        /// <inheritdoc/>
+        public async Task<ResultModels<CategoryResponse>> GetAsync(
             Expression<Func<CategoryRequest, bool>>? predicate = null,
             Func<IQueryable<CategoryRequest>,
                 IOrderedQueryable<CategoryRequest>>? orderBy = null,
@@ -99,12 +140,12 @@ namespace home_wiki_backend.BL.Services
             try
             {
                 _logger.LogInformation("Getting category list.");
-                var pred = predicate?.ConvertTo<CategoryRequest, Category>();
-                var cats = await _catRepo.GetAsync(
-                    pred,
+                var pred = predicate?.ConvertTo<CategoryRequest, 
+                    Category>();
+                var cats = await _catRepo.GetAsync(pred,
                     orderBy?.ConvertTo<CategoryRequest, Category>(),
                     cancellationToken);
-                return cats.Select(c => new CategoryResponse
+                var data = cats.Select(c => new CategoryResponse
                 {
                     Id = c.Id,
                     Name = c.Name,
@@ -112,36 +153,51 @@ namespace home_wiki_backend.BL.Services
                     CreatedAt = c.CreatedAt,
                     ModifiedBy = c.ModifiedBy,
                     ModifiedAt = c.ModifiedAt
-                });
+                }).ToList();
+                return new ResultModels<CategoryResponse>
+                {
+                    Success = true,
+                    Message = "Categories retrieved successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = data
+                };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting category list.");
-                throw new CategoryServiceException("Error retrieving categories", ex);
+                _logger.LogError(ex, "Error retrieving categories.");
+                return new ResultModels<CategoryResponse>
+                {
+                    Success = false,
+                    Message = "Error retrieving categories",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message,
+                    ErrorCode.Unexpected)
+                };
             }
         }
 
-        public async Task<IEnumerable<CategoryResponse>> GetPagedAsync(
+        /// <inheritdoc/>
+        public async Task<ResultModels<CategoryResponse>> 
+            GetPagedAsync(
             int pageNumber,
             int pageSize,
-            Expression<Func<CategoryRequest, bool>>? predicate = null,
-            Func<IQueryable<CategoryRequest>,
+            Expression<Func<CategoryRequest,
+                bool>>? predicate = null,
+            Func<IQueryable<CategoryRequest>, 
                 IOrderedQueryable<CategoryRequest>>? orderBy = null,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation(
-                    "Paged categories: page {PageNumber}, size {PageSize}",
+                _logger.LogInformation("Fetching paged categories. " +
+                    "Page: {PageNumber}, Size: {PageSize}",
                     pageNumber, pageSize);
                 var pred = predicate?.ConvertTo<CategoryRequest, Category>();
-                var paged = await _catRepo.GetPagedAsync(
-                    pageNumber,
-                    pageSize,
-                    pred,
-                    orderBy?.ConvertTo<CategoryRequest, Category>(),
-                    cancellationToken);
-                return paged?.Items?.Select(c => new CategoryResponse
+                var paged = await _catRepo.GetPagedAsync(pageNumber, 
+                    pageSize, pred,
+                    orderBy?.ConvertTo<CategoryRequest,
+                    Category>(), cancellationToken);
+                var data = paged.Items.Select(c => new CategoryResponse
                 {
                     Id = c.Id,
                     Name = c.Name,
@@ -149,31 +205,53 @@ namespace home_wiki_backend.BL.Services
                     CreatedAt = c.CreatedAt,
                     ModifiedBy = c.ModifiedBy,
                     ModifiedAt = c.ModifiedAt
-                }) ?? Array.Empty<CategoryResponse>();
+                }).ToList();
+                return new ResultModels<CategoryResponse>
+                {
+                    Success = true,
+                    Message = "Paged categories retrieved successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = data
+                };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving paged categories.");
-                throw new CategoryServiceException("Error retrieving paged categories", ex);
+                return new ResultModels<CategoryResponse>
+                {
+                    Success = false,
+                    Message = "Error retrieving paged categories",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message, 
+                    ErrorCode.Unexpected)
+                };
             }
         }
 
-        public async Task<CategoryResponse> UpdateAsync(
+        /// <inheritdoc/>
+        public async Task<ResultModel<CategoryResponse>> UpdateAsync(
             CategoryRequest category,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("Updating category ID: {Id}",
+                _logger.LogInformation("Updating category ID: {Id}", 
                     category.Id);
                 var exist = await _catRepo.FirstOrDefaultAsync(
                     c => c.Id == category.Id, cancellationToken);
                 if (exist == null)
                 {
-                    _logger.LogWarning("Category ID {Id} not found for update.",
-                        category.Id);
-                    throw new KeyNotFoundException(
-                        $"Category with ID {category.Id} not found.");
+                    _logger.LogWarning("Category with ID {Id} not" +
+                        " found.", category.Id);
+                    return new ResultModel<CategoryResponse>
+                    {
+                        Success = false,
+                        Message = $"Category with ID {category.Id} " +
+                        $"not found.",
+                        Code = StatusCodes.Status404NotFound,
+                        Error = new ErrorResultModel("Not found", 
+                        ErrorCode.Unexpected)
+                    };
                 }
                 var upd = new Category
                 {
@@ -181,143 +259,210 @@ namespace home_wiki_backend.BL.Services
                     Name = category.Name,
                     CreatedBy = exist.CreatedBy,
                     CreatedAt = exist.CreatedAt,
-                    ModifiedBy = "system", // Replace as needed.
+                    ModifiedBy = "system",
                     ModifiedAt = DateTime.UtcNow
                 };
                 await _catRepo.UpdateAsync(upd, cancellationToken);
-                return new CategoryResponse
+                return new ResultModel<CategoryResponse>
                 {
-                    Id = upd.Id,
-                    Name = upd.Name,
-                    CreatedBy = upd.CreatedBy,
-                    CreatedAt = upd.CreatedAt,
-                    ModifiedBy = upd.ModifiedBy,
-                    ModifiedAt = upd.ModifiedAt
+                    Success = true,
+                    Message = "Category updated successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = new CategoryResponse
+                    {
+                        Id = upd.Id,
+                        Name = upd.Name,
+                        CreatedBy = upd.CreatedBy,
+                        CreatedAt = upd.CreatedAt,
+                        ModifiedBy = upd.ModifiedBy,
+                        ModifiedAt = upd.ModifiedAt
+                    }
                 };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating category ID: {Id}",
+                _logger.LogError(ex, "Error updating category ID: {Id}", 
                     category.Id);
-                throw new CategoryServiceException("Error updating category", ex);
+                return new ResultModel<CategoryResponse>
+                {
+                    Success = false,
+                    Message = "Error updating category",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message, 
+                    ErrorCode.Unexpected)
+                };
             }
         }
 
-        public async Task DeleteAsync(
+        /// <inheritdoc/>
+        public async Task<ResultModel<CategoryResponse>> DeleteAsync(
             int id,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("Deleting category ID: {Id}", id);
-                await _catRepo.RemoveAsync(
-                    c => c.Id == id, cancellationToken);
+                _logger.LogInformation("Deleting category ID: " +
+                    "{Id}", id);
+                await _catRepo.RemoveAsync(c => c.Id == id,
+                    cancellationToken);
+                return new ResultModel<CategoryResponse>
+                {
+                    Success = true,
+                    Message = "Category deleted successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = null
+                };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting category ID: {Id}", id);
-                throw new CategoryServiceException("Error deleting category", ex);
+                _logger.LogError(ex, "Error deleting category ID: " +
+                    "{Id}", id);
+                return new ResultModel<CategoryResponse>
+                {
+                    Success = false,
+                    Message = "Error deleting category",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message, 
+                    ErrorCode.Unexpected)
+                };
             }
         }
 
-        public async Task RemoveAsync(
+        /// <inheritdoc/>
+        public async Task<ResultModel<CategoryResponse>> RemoveAsync(
             CategoryRequest category,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("Removing category: {Name}",
+                _logger.LogInformation("Removing category: {Name}", 
                     category.Name);
-                await _catRepo.RemoveAsync(
-                    c => c.Name == category.Name, cancellationToken);
+                await _catRepo.RemoveAsync(c => c.Name == category.Name,
+                    cancellationToken);
+                return new ResultModel<CategoryResponse>
+                {
+                    Success = true,
+                    Message = "Category removed successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = null
+                };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error removing category: {Name}",
                     category.Name);
-                throw new CategoryServiceException("Error removing category", ex);
+                return new ResultModel<CategoryResponse>
+                {
+                    Success = false,
+                    Message = "Error removing category",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message, 
+                    ErrorCode.Unexpected)
+                };
             }
         }
 
+        /// <inheritdoc/>
         public async Task<bool> ExistsAsync(
             int id,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("Checking if category exists: ID {Id}",
-                    id);
-                return await _catRepo.AnyAsync(
-                    c => c.Id == id, cancellationToken);
+                return await _catRepo.AnyAsync(c => c.Id == id, 
+                    cancellationToken);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error checking existence for ID: {Id}",
-                    id);
-                throw new CategoryServiceException("Error checking category existence", ex);
+                _logger.LogError(ex, "Error checking category " +
+                    "existence for ID: " +
+                    "{Id}", id);
+                return false;
             }
         }
 
+        /// <inheritdoc/>
         public async Task<bool> AnyAsync(
             Expression<Func<CategoryRequest, bool>>? predicate = null,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("Checking any category match.");
                 var pred = predicate?.ConvertTo<CategoryRequest, Category>();
                 return await _catRepo.AnyAsync(pred, cancellationToken);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in AnyAsync check for categories.");
-                throw new CategoryServiceException("Error checking any category", ex);
+                _logger.LogError(ex, "Error in AnyAsync for categories.");
+                return false;
             }
         }
 
-        public async Task<CategoryResponse?> FirstOrDefault(
+        /// <inheritdoc/>
+        public async Task<ResultModel<CategoryResponse>> FirstOrDefault(
             Expression<Func<CategoryRequest, bool>>? predicate = null,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("Getting first matching category.");
-                var pred = predicate?.ConvertTo<CategoryRequest, Category>();
-                var cat = await _catRepo.FirstOrDefaultAsync(pred,
+                var pred = predicate?.ConvertTo<CategoryRequest,
+                    Category>();
+                var cat = await _catRepo.FirstOrDefaultAsync(pred, 
                     cancellationToken);
                 if (cat == null)
                 {
-                    _logger.LogWarning("No matching category found.");
-                    return null;
+                    return new ResultModel<CategoryResponse>
+                    {
+                        Success = false,
+                        Message = "No matching category found",
+                        Code = StatusCodes.Status404NotFound,
+                        Error = new ErrorResultModel("Not found", 
+                        ErrorCode.Unexpected)
+                    };
                 }
-                return new CategoryResponse
+                return new ResultModel<CategoryResponse>
                 {
-                    Id = cat.Id,
-                    Name = cat.Name,
-                    CreatedBy = cat.CreatedBy,
-                    CreatedAt = cat.CreatedAt,
-                    ModifiedBy = cat.ModifiedBy,
-                    ModifiedAt = cat.ModifiedAt
+                    Success = true,
+                    Message = "Category retrieved successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = new CategoryResponse
+                    {
+                        Id = cat.Id,
+                        Name = cat.Name,
+                        CreatedBy = cat.CreatedBy,
+                        CreatedAt = cat.CreatedAt,
+                        ModifiedBy = cat.ModifiedBy,
+                        ModifiedAt = cat.ModifiedAt
+                    }
                 };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in FirstOrDefault for category.");
-                throw new CategoryServiceException("Error getting first category",
-                    ex);
+                _logger.LogError(ex, "Error in FirstOrDefault for " +
+                    "categories.");
+                return new ResultModel<CategoryResponse>
+                {
+                    Success = false,
+                    Message = "Error retrieving first category",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message,
+                    ErrorCode.Unexpected)
+                };
             }
         }
 
-        public async Task<IEnumerable<CategoryResponse>> GetListAsync(
+        /// <inheritdoc/>
+        public async Task<ResultModels<CategoryResponse>> GetListAsync(
             ISpecification<Category> specification,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("Getting list via spec.");
-                var cats = await _catRepo.ListAsync(specification,
+                _logger.LogInformation("Retrieving categories " +
+                    "via specification.");
+                var cats = await _catRepo.ListAsync(specification, 
                     cancellationToken);
-                return cats.Select(c => new CategoryResponse
+                var data = cats.Select(c => new CategoryResponse
                 {
                     Id = c.Id,
                     Name = c.Name,
@@ -325,12 +470,27 @@ namespace home_wiki_backend.BL.Services
                     CreatedAt = c.CreatedAt,
                     ModifiedBy = c.ModifiedBy,
                     ModifiedAt = c.ModifiedAt
-                });
+                }).ToList();
+                return new ResultModels<CategoryResponse>
+                {
+                    Success = true,
+                    Message = "Categories retrieved via specification",
+                    Code = StatusCodes.Status200OK,
+                    Data = data
+                };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting category list via spec.");
-                throw new CategoryServiceException("Error retrieving category list by spec", ex);
+                _logger.LogError(ex, "Error retrieving categories via" +
+                    " specification.");
+                return new ResultModels<CategoryResponse>
+                {
+                    Success = false,
+                    Message = "Error retrieving categories by specification",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message, 
+                    ErrorCode.Unexpected)
+                };
             }
         }
     }

@@ -1,14 +1,18 @@
 ﻿using System.Linq.Expressions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using home_wiki_backend.BL.Common.Contracts.Services;
 using home_wiki_backend.BL.Common.Models.Requests;
 using home_wiki_backend.DAL.Common.Contracts;
 using home_wiki_backend.DAL.Common.Models.Entities;
-using home_wiki_backend.DAL.Exceptions;
+using home_wiki_backend.Shared.Models.Results.Generic;
+using home_wiki_backend.Shared.Enums;
 using home_wiki_backend.Shared.Helpers;
+using home_wiki_backend.Shared.Models.Results.Errors;
 
 namespace home_wiki_backend.BL.Services
 {
+    /// <inheritdoc/>
     public sealed class TagService : ITagService
     {
         private readonly IGenericRepository<Tag> _tagRepo;
@@ -22,7 +26,8 @@ namespace home_wiki_backend.BL.Services
             _logger = logger;
         }
 
-        public async Task<TagResponse> CreateAsync(
+        /// <inheritdoc/>
+        public async Task<ResultModel<TagResponse>> CreateAsync(
             TagRequest tag,
             CancellationToken cancellationToken = default)
         {
@@ -32,30 +37,45 @@ namespace home_wiki_backend.BL.Services
                 var newTag = new Tag
                 {
                     Name = tag.Name,
-                    CreatedBy = "system", // Replace as needed.
+                    CreatedBy = "system",
                     CreatedAt = DateTime.UtcNow
                 };
-                var created = await _tagRepo.AddAsync(newTag,
+                var created = await _tagRepo.AddAsync(newTag, 
                     cancellationToken);
-                _logger.LogInformation("Tag created with ID: {Id}", created.Id);
-                return new TagResponse
+                _logger.LogInformation("Tag created with ID: {Id}", 
+                    created.Id);
+                return new ResultModel<TagResponse>
                 {
-                    Id = created.Id,
-                    Name = created.Name,
-                    CreatedBy = created.CreatedBy,
-                    CreatedAt = created.CreatedAt,
-                    ModifiedBy = created.ModifiedBy,
-                    ModifiedAt = created.ModifiedAt
+                    Success = true,
+                    Message = "Tag created successfully",
+                    Code = StatusCodes.Status201Created,
+                    Data = new TagResponse
+                    {
+                        Id = created.Id,
+                        Name = created.Name,
+                        CreatedBy = created.CreatedBy,
+                        CreatedAt = created.CreatedAt,
+                        ModifiedBy = created.ModifiedBy,
+                        ModifiedAt = created.ModifiedAt
+                    }
                 };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating tag: {Name}", tag.Name);
-                throw new TagServiceException("Error creating tag", ex);
+                return new ResultModel<TagResponse>
+                {
+                    Success = false,
+                    Message = "Error creating tag",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message, 
+                    ErrorCode.Unexpected)
+                };
             }
         }
 
-        public async Task<TagResponse> GetByIdAsync(
+        /// <inheritdoc/>
+        public async Task<ResultModel<TagResponse>> GetByIdAsync(
             int id,
             CancellationToken cancellationToken = default)
         {
@@ -67,41 +87,61 @@ namespace home_wiki_backend.BL.Services
                 if (tag == null)
                 {
                     _logger.LogWarning("Tag with ID {Id} not found.", id);
-                    throw new KeyNotFoundException(
-                        $"Tag with ID {id} not found.");
+                    return new ResultModel<TagResponse>
+                    {
+                        Success = false,
+                        Message = $"Tag with ID {id} not found.",
+                        Code = StatusCodes.Status404NotFound,
+                        Error = new ErrorResultModel("Not found", 
+                        ErrorCode.Unexpected)
+                    };
                 }
-                return new TagResponse
+                return new ResultModel<TagResponse>
                 {
-                    Id = tag.Id,
-                    Name = tag.Name,
-                    CreatedBy = tag.CreatedBy,
-                    CreatedAt = tag.CreatedAt,
-                    ModifiedBy = tag.ModifiedBy,
-                    ModifiedAt = tag.ModifiedAt
+                    Success = true,
+                    Message = "Tag retrieved successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = new TagResponse
+                    {
+                        Id = tag.Id,
+                        Name = tag.Name,
+                        CreatedBy = tag.CreatedBy,
+                        CreatedAt = tag.CreatedAt,
+                        ModifiedBy = tag.ModifiedBy,
+                        ModifiedAt = tag.ModifiedAt
+                    }
                 };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting tag by ID: {Id}", id);
-                throw new TagServiceException("Error retrieving tag", ex);
+                _logger.LogError(ex, "Error retrieving tag by ID: " +
+                    "{Id}", id);
+                return new ResultModel<TagResponse>
+                {
+                    Success = false,
+                    Message = "Error retrieving tag by ID",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message,
+                    ErrorCode.Unexpected)
+                };
             }
         }
 
-        public async Task<IEnumerable<TagResponse>> GetAsync(
+        /// <inheritdoc/>
+        public async Task<ResultModels<TagResponse>> GetAsync(
             Expression<Func<TagRequest, bool>>? predicate = null,
-            Func<IQueryable<TagRequest>,
+            Func<IQueryable<TagRequest>, 
                 IOrderedQueryable<TagRequest>>? orderBy = null,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("Getting tag list.");
+                _logger.LogInformation("Retrieving tags with filters.");
                 var pred = predicate?.ConvertTo<TagRequest, Tag>();
-                var tags = await _tagRepo.GetAsync(
-                    pred,
+                var tags = await _tagRepo.GetAsync(pred,
                     orderBy?.ConvertTo<TagRequest, Tag>(),
                     cancellationToken);
-                return tags.Select(t => new TagResponse
+                var data = tags.Select(t => new TagResponse
                 {
                     Id = t.Id,
                     Name = t.Name,
@@ -109,35 +149,48 @@ namespace home_wiki_backend.BL.Services
                     CreatedAt = t.CreatedAt,
                     ModifiedBy = t.ModifiedBy,
                     ModifiedAt = t.ModifiedAt
-                });
+                }).ToList();
+                return new ResultModels<TagResponse>
+                {
+                    Success = true,
+                    Message = "Tags retrieved successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = data
+                };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting tag list.");
-                throw new TagServiceException("Error retrieving tags", ex);
+                _logger.LogError(ex, "Error retrieving tags.");
+                return new ResultModels<TagResponse>
+                {
+                    Success = false,
+                    Message = "Error retrieving tags",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message,
+                    ErrorCode.Unexpected)
+                };
             }
         }
 
-        public async Task<IEnumerable<TagResponse>> GetPagedAsync(
+        /// <inheritdoc/>
+        public async Task<ResultModels<TagResponse>> GetPagedAsync(
             int pageNumber,
             int pageSize,
             Expression<Func<TagRequest, bool>>? predicate = null,
-            Func<IQueryable<TagRequest>,
+            Func<IQueryable<TagRequest>, 
                 IOrderedQueryable<TagRequest>>? orderBy = null,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("Paged tags: page {PageNumber}, size {PageSize}",
+                _logger.LogInformation("Fetching paged tags. Page: " +
+                    "{PageNumber}, Size: {PageSize}",
                     pageNumber, pageSize);
                 var pred = predicate?.ConvertTo<TagRequest, Tag>();
-                var paged = await _tagRepo.GetPagedAsync(
-                    pageNumber,
-                    pageSize,
-                    pred,
-                    orderBy?.ConvertTo<TagRequest, Tag>(),
-                    cancellationToken);
-                return paged?.Items?.Select(t => new TagResponse
+                var paged = await _tagRepo.GetPagedAsync(pageNumber, 
+                    pageSize, pred,
+                    orderBy?.ConvertTo<TagRequest, Tag>(), cancellationToken);
+                var data = paged.Items.Select(t => new TagResponse
                 {
                     Id = t.Id,
                     Name = t.Name,
@@ -145,169 +198,255 @@ namespace home_wiki_backend.BL.Services
                     CreatedAt = t.CreatedAt,
                     ModifiedBy = t.ModifiedBy,
                     ModifiedAt = t.ModifiedAt
-                }) ?? Array.Empty<TagResponse>();
+                }).ToList();
+                return new ResultModels<TagResponse>
+                {
+                    Success = true,
+                    Message = "Paged tags retrieved successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = data
+                };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving paged tags.");
-                throw new TagServiceException("Error retrieving paged tags", ex);
+                return new ResultModels<TagResponse>
+                {
+                    Success = false,
+                    Message = "Error retrieving paged tags",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message,
+                    ErrorCode.Unexpected)
+                };
             }
         }
 
-        public async Task<TagResponse> UpdateAsync(
+        /// <inheritdoc/>
+        public async Task<ResultModel<TagResponse>> UpdateAsync(
             TagRequest tag,
             CancellationToken cancellationToken = default)
         {
             try
             {
                 _logger.LogInformation("Updating tag ID: {Id}", tag.Id);
-                var exist = await _tagRepo.FirstOrDefaultAsync(
+                var existing = await _tagRepo.FirstOrDefaultAsync(
                     t => t.Id == tag.Id, cancellationToken);
-                if (exist == null)
+                if (existing == null)
                 {
-                    _logger.LogWarning("Tag ID {Id} not found for update.",
-                        tag.Id);
-                    throw new KeyNotFoundException(
-                        $"Tag with ID {tag.Id} not found.");
+                    _logger.LogWarning("Tag with ID {Id} not found.", tag.Id);
+                    return new ResultModel<TagResponse>
+                    {
+                        Success = false,
+                        Message = $"Tag with ID {tag.Id} not found.",
+                        Code = StatusCodes.Status404NotFound,
+                        Error = new ErrorResultModel("Not found", 
+                        ErrorCode.Unexpected)
+                    };
                 }
-                var upd = new Tag
+                var updated = new Tag
                 {
                     Id = tag.Id,
                     Name = tag.Name,
-                    CreatedBy = exist.CreatedBy,
-                    CreatedAt = exist.CreatedAt,
-                    ModifiedBy = "system", // Replace as needed.
+                    CreatedBy = existing.CreatedBy,
+                    CreatedAt = existing.CreatedAt,
+                    ModifiedBy = "system",
                     ModifiedAt = DateTime.UtcNow
                 };
-                await _tagRepo.UpdateAsync(upd, cancellationToken);
-                return new TagResponse
+                await _tagRepo.UpdateAsync(updated, cancellationToken);
+                return new ResultModel<TagResponse>
                 {
-                    Id = upd.Id,
-                    Name = upd.Name,
-                    CreatedBy = upd.CreatedBy,
-                    CreatedAt = upd.CreatedAt,
-                    ModifiedBy = upd.ModifiedBy,
-                    ModifiedAt = upd.ModifiedAt
+                    Success = true,
+                    Message = "Tag updated successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = new TagResponse
+                    {
+                        Id = updated.Id,
+                        Name = updated.Name,
+                        CreatedBy = updated.CreatedBy,
+                        CreatedAt = updated.CreatedAt,
+                        ModifiedBy = updated.ModifiedBy,
+                        ModifiedAt = updated.ModifiedAt
+                    }
                 };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating tag ID: {Id}", tag.Id);
-                throw new TagServiceException("Error updating tag", ex);
+                return new ResultModel<TagResponse>
+                {
+                    Success = false,
+                    Message = "Error updating tag",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message, 
+                    ErrorCode.Unexpected)
+                };
             }
         }
 
-        public async Task DeleteAsync(
+        /// <inheritdoc/>
+        public async Task<ResultModel<TagResponse>> DeleteAsync(
             int id,
             CancellationToken cancellationToken = default)
         {
             try
             {
                 _logger.LogInformation("Deleting tag ID: {Id}", id);
-                await _tagRepo.RemoveAsync(
-                    t => t.Id == id, cancellationToken);
+                await _tagRepo.RemoveAsync(t => t.Id == id, 
+                    cancellationToken);
+                return new ResultModel<TagResponse>
+                {
+                    Success = true,
+                    Message = "Tag deleted successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = null
+                };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting tag ID: {Id}", id);
-                throw new TagServiceException("Error deleting tag", ex);
+                return new ResultModel<TagResponse>
+                {
+                    Success = false,
+                    Message = "Error deleting tag",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message, 
+                    ErrorCode.Unexpected)
+                };
             }
         }
 
-        public async Task RemoveAsync(
+        /// <inheritdoc/>
+        public async Task<ResultModel<TagResponse>> RemoveAsync(
             TagRequest tag,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("Removing tag: {Name}", tag.Name);
-                await _tagRepo.RemoveAsync(
-                    t => t.Name == tag.Name, cancellationToken);
+                _logger.LogInformation("Removing tag: {Name}",
+                    tag.Name);
+                await _tagRepo.RemoveAsync(t => t.Name == tag.Name, 
+                    cancellationToken);
+                return new ResultModel<TagResponse>
+                {
+                    Success = true,
+                    Message = "Tag removed successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = null
+                };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error removing tag: {Name}", tag.Name);
-                throw new TagServiceException("Error removing tag", ex);
+                _logger.LogError(ex, "Error removing tag: " +
+                    "{Name}", tag.Name);
+                return new ResultModel<TagResponse>
+                {
+                    Success = false,
+                    Message = "Error removing tag",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message,
+                    ErrorCode.Unexpected)
+                };
             }
         }
 
+        /// <inheritdoc/>
         public async Task<bool> ExistsAsync(
             int id,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("Checking tag exists: ID {Id}", id);
-                return await _tagRepo.AnyAsync(
-                    t => t.Id == id, cancellationToken);
+                return await _tagRepo.AnyAsync(t => t.Id == id, 
+                    cancellationToken);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error checking tag existence for ID: {Id}",
-                    id);
-                throw new TagServiceException("Error checking tag existence", ex);
+                _logger.LogError(ex, "Error checking tag " +
+                    "existence for ID: {Id}", id);
+                return false;
             }
         }
 
+        /// <inheritdoc/>
         public async Task<bool> AnyAsync(
             Expression<Func<TagRequest, bool>>? predicate = null,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("Checking any tag match.");
                 var pred = predicate?.ConvertTo<TagRequest, Tag>();
                 return await _tagRepo.AnyAsync(pred, cancellationToken);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in AnyAsync for tags.");
-                throw new TagServiceException("Error checking any tag match", ex);
+                return false;
             }
         }
 
-        public async Task<TagResponse?> FirstOrDefault(
+        /// <inheritdoc/>
+        public async Task<ResultModel<TagResponse>> FirstOrDefault(
             Expression<Func<TagRequest, bool>>? predicate = null,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("Getting first matching tag.");
                 var pred = predicate?.ConvertTo<TagRequest, Tag>();
-                var tag = await _tagRepo.FirstOrDefaultAsync(
-                    pred, cancellationToken);
+                var tag = await _tagRepo.FirstOrDefaultAsync(pred, 
+                    cancellationToken);
                 if (tag == null)
                 {
-                    _logger.LogWarning("No matching tag found.");
-                    return null;
+                    return new ResultModel<TagResponse>
+                    {
+                        Success = false,
+                        Message = "No matching tag found",
+                        Code = StatusCodes.Status404NotFound,
+                        Error = new ErrorResultModel("Not found", 
+                        ErrorCode.Unexpected)
+                    };
                 }
-                return new TagResponse
+                return new ResultModel<TagResponse>
                 {
-                    Id = tag.Id,
-                    Name = tag.Name,
-                    CreatedBy = tag.CreatedBy,
-                    CreatedAt = tag.CreatedAt,
-                    ModifiedBy = tag.ModifiedBy,
-                    ModifiedAt = tag.ModifiedAt
+                    Success = true,
+                    Message = "Tag retrieved successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = new TagResponse
+                    {
+                        Id = tag.Id,
+                        Name = tag.Name,
+                        CreatedBy = tag.CreatedBy,
+                        CreatedAt = tag.CreatedAt,
+                        ModifiedBy = tag.ModifiedBy,
+                        ModifiedAt = tag.ModifiedAt
+                    }
                 };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in FirstOrDefault for tag.");
-                throw new TagServiceException("Error getting first matching tag", ex);
+                _logger.LogError(ex, "Error in FirstOrDefault for tags.");
+                return new ResultModel<TagResponse>
+                {
+                    Success = false,
+                    Message = "Error retrieving first tag",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message, 
+                    ErrorCode.Unexpected)
+                };
             }
         }
 
-        public async Task<IEnumerable<TagResponse>> GetListAsync(
+        /// <inheritdoc/>
+        public async Task<ResultModels<TagResponse>> GetListAsync(
             ISpecification<Tag> specification,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("Getting list via spec.");
-                var tags = await _tagRepo.ListAsync(specification,
+                _logger.LogInformation("Retrieving tags " +
+                    "via specification.");
+                var tags = await _tagRepo.ListAsync(specification, 
                     cancellationToken);
-                return tags.Select(t => new TagResponse
+                var data = tags.Select(t => new TagResponse
                 {
                     Id = t.Id,
                     Name = t.Name,
@@ -315,12 +454,27 @@ namespace home_wiki_backend.BL.Services
                     CreatedAt = t.CreatedAt,
                     ModifiedBy = t.ModifiedBy,
                     ModifiedAt = t.ModifiedAt
-                });
+                }).ToList();
+                return new ResultModels<TagResponse>
+                {
+                    Success = true,
+                    Message = "Tags retrieved via specification",
+                    Code = StatusCodes.Status200OK,
+                    Data = data
+                };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting tag list via spec.");
-                throw new TagServiceException("Error retrieving tag list by spec", ex);
+                _logger.LogError(ex, "Error retrieving tags " +
+                    "via specification.");
+                return new ResultModels<TagResponse>
+                {
+                    Success = false,
+                    Message = "Error retrieving tags by specification",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message,
+                    ErrorCode.Unexpected)
+                };
             }
         }
     }
