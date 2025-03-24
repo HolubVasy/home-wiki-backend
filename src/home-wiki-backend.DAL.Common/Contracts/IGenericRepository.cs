@@ -1,5 +1,6 @@
 ﻿using home_wiki_backend.DAL.Common.Models.Paginations;
 using home_wiki_backend.Shared.Contracts;
+using home_wiki_backend.Shared.Models;
 using System.Linq.Expressions;
 
 namespace home_wiki_backend.DAL.Common.Contracts
@@ -10,8 +11,8 @@ namespace home_wiki_backend.DAL.Common.Contracts
         /// Asynchronously gets a collection of entities that satisfy the specified
         /// predicate.
         /// </summary>
-        /// <param name="predicate">A function to test each element for a condition.
-        /// </param>
+        /// <param name="predicate">A function to test each element for a condition.</param>
+        /// <param name="orderBy">A function to order the entities.</param>
         /// <param name="cancellationToken">A cancellation token that can be used to
         /// cancel the work.</param>
         /// <returns>A task that represents the asynchronous operation. The task result
@@ -25,26 +26,23 @@ namespace home_wiki_backend.DAL.Common.Contracts
         /// Asynchronously gets the first entity that satisfies the specified predicate
         /// or null if no such entity is found.
         /// </summary>
-        /// <param name="predicate">A function to test each element for a condition.
-        /// </param>
+        /// <param name="predicate">A function to test each element for a condition.</param>
         /// <param name="cancellationToken">A cancellation token that can be used to
         /// cancel the work.</param>
         /// <returns>A task that represents the asynchronous operation. The task result
         /// contains the first entity or null.</returns>
-        Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate,
+        Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>>? predicate = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Asynchronously determines whether any entity satisfies the specified
         /// predicate.
         /// </summary>
-        /// <param name="predicate">A function to test each element for a condition.
-        /// </param>
+        /// <param name="predicate">A function to test each element for a condition.</param>
         /// <param name="cancellationToken">A cancellation token that can be used to
         /// cancel the work.</param>
         /// <returns>A task that represents the asynchronous operation. The task result
-        /// contains true if any entity satisfies the predicate; otherwise, false.
-        /// </returns>
+        /// contains true if any entity satisfies the predicate; otherwise, false.</returns>
         Task<bool> AnyAsync(Expression<Func<TEntity, bool>>? predicate,
             CancellationToken cancellationToken = default);
 
@@ -71,8 +69,7 @@ namespace home_wiki_backend.DAL.Common.Contracts
         /// Asynchronously gets a collection of entities that satisfy the specified
         /// predicate, including specified navigation properties.
         /// </summary>
-        /// <param name="predicate">A function to test each element for a condition.
-        /// </param>
+        /// <param name="predicate">A function to test each element for a condition.</param>
         /// <param name="includes">A collection of lambda expressions representing the
         /// paths to the navigation properties to be included.</param>
         /// <returns>A task that represents the asynchronous operation. The task result
@@ -84,8 +81,7 @@ namespace home_wiki_backend.DAL.Common.Contracts
         /// Asynchronously gets an entity by its identifier, including specified
         /// navigation properties.
         /// </summary>
-        /// <param name="predicate">A function to test each element for a condition.
-        /// </param>
+        /// <param name="predicate">A function to test each element for a condition.</param>
         /// <param name="includes">A collection of lambda expressions representing the
         /// paths to the navigation properties to be included.</param>
         /// <returns>A task that represents the asynchronous operation. The task result
@@ -96,23 +92,41 @@ namespace home_wiki_backend.DAL.Common.Contracts
         /// <summary>
         /// Asynchronously removes entities that satisfy the specified predicate.
         /// </summary>
-        /// <param name="predicate">A function to test each element for a condition.
-        /// </param>
+        /// <param name="predicate">A function to test each element for a condition.</param>
         /// <param name="cancellationToken">A cancellation token that can be used to
         /// cancel the work.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        Task RemoveAsync(Expression<Func<TEntity, bool>> predicate,
+        Task RemoveAsync(Expression<Func<TEntity, bool>>? predicate,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Asynchronously removes a specific entity.
+        /// </summary>
+        /// <param name="entity">The entity to remove.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used to
+        /// cancel the work.</param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        Task RemoveAsync(TEntity? entity,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Asynchronously finds an entity by its identifier.
+        /// </summary>
+        /// <param name="id">The identifier of the entity to find.</param>
+        /// <param name="cancellationToken">A cancellation token that 
+        /// can be used to cancel the work.</param>
+        /// <returns>A task that represents the asynchronous operation. 
+        /// The task result contains the entity if found; otherwise, null.</returns>
+        Task<TEntity?> FindAsync(int id,
             CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Asynchronously gets a collection of entities that satisfy the specified
         /// predicate, including nested navigation properties.
         /// </summary>
-        /// <param name="predicate">A function to test each element for a condition.
-        /// </param>
+        /// <param name="predicate">A function to test each element for a condition.</param>
         /// <param name="navigationPropertyPaths">A collection of lambda expressions
-        /// representing the paths to the navigation properties to be included.
-        /// </param>
+        /// representing the paths to the navigation properties to be included.</param>
         /// <param name="cancellationToken">A cancellation token that can be used to
         /// cancel the work.</param>
         /// <returns>A task that represents the asynchronous operation. The task result
@@ -130,9 +144,10 @@ namespace home_wiki_backend.DAL.Common.Contracts
         /// <summary>
         /// Asynchronously gets a paginated collection of entities that satisfy the specified predicate.
         /// </summary>
-        /// <param name="predicate">A function to test each element for a condition.</param>
         /// <param name="pageNumber">The page number to retrieve.</param>
         /// <param name="pageSize">The number of entities per page.</param>
+        /// <param name="predicate">A function to test each element for a condition.</param>
+        /// <param name="orderBy">A function to order the entities.</param>
         /// <param name="cancellationToken">A cancellation token that can be used to cancel the work.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a paginated collection of entities.</returns>
         Task<PagedList<TEntity>> GetPagedAsync(

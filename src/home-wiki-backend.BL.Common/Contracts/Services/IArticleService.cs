@@ -1,4 +1,5 @@
 ﻿using home_wiki_backend.BL.Common.Models.Requests;
+using home_wiki_backend.Shared.Models;
 using System.Linq.Expressions;
 
 namespace home_wiki_backend.BL.Common.Contracts.Services
@@ -47,7 +48,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <param name="orderBy">A function to order the articles.</param>
         /// <param name="cancellationToken">A token to cancel the operation.</param>
         /// <returns>A task that represents the asynchronous operation. The task result contains a collection of article responses.</returns>
-        Task<IEnumerable<ArticleResponse>> GetPagedAsync(
+        Task<PagedList<ArticleResponse>> GetPagedAsync(
             int pageNumber, int pageSize,
             Expression<Func<ArticleRequest, bool>>? predicate = default,
             Func<IQueryable<ArticleRequest>, IOrderedQueryable<ArticleRequest>>? orderBy = default,
@@ -77,7 +78,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <param name="article">The article request model.</param>
         /// <param name="cancellationToken">A token to cancel the operation.</param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        Task DeleteAsync(ArticleRequest article,
+        Task RemoveAsync(ArticleRequest article,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -98,5 +99,17 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         Task<bool> AnyAsync(
             Expression<Func<ArticleRequest, bool>>? predicate = default,
             CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Gets the first article that matches the specified criteria asynchronously.
+        /// </summary>
+        /// <param name="predicate">An expression to filter the articles.</param>
+        /// <param name="cancellationToken">A token to cancel the operation.</param>
+        /// <returns>A task that represents the asynchronous operation. 
+        /// The task result contains the first article response that matches the criteria or null if no article matches.</returns>
+        Task<ArticleResponse?> FirstOrDefault(Expression<Func<ArticleRequest, bool>>? 
+            predicate = default,
+            CancellationToken cancellationToken = default);
+            
     }
 }

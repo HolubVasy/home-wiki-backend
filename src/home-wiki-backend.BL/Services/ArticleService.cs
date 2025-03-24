@@ -2,10 +2,12 @@
 using home_wiki_backend.BL.Common.Models.Requests;
 using home_wiki_backend.DAL.Common.Contracts;
 using home_wiki_backend.DAL.Common.Models.Entities;
+using home_wiki_backend.Shared.Models;
 using System.Linq.Expressions;
 
 namespace home_wiki_backend.BL.Services
 {
+    /// <inheritdoc/>
     public sealed class ArticleService : IArticleService
     {
         private readonly IGenericRepository<Article> _articleRepository;
@@ -22,6 +24,7 @@ namespace home_wiki_backend.BL.Services
             return await _articleRepository.AnyAsync(articlePredicate, cancellationToken);
         }
 
+        /// <inheritdoc/>
         public async Task<ArticleResponse> CreateAsync(ArticleRequest articleRequest,
             CancellationToken cancellationToken = default)
         {
@@ -46,26 +49,63 @@ namespace home_wiki_backend.BL.Services
             };
         }
 
+        /// <inheritdoc/>
         public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
         {
             await _articleRepository
                 .RemoveAsync(a => a.Id == id, cancellationToken);
         }
 
-        public async Task DeleteAsync(ArticleRequest articleRequest, CancellationToken cancellationToken = default)
+        /// <inheritdoc/>
+        public async Task RemoveAsync(ArticleRequest articleRequest,
+            CancellationToken cancellationToken = default)
         {
-            await _articleRepository.RemoveAsync(a => a.Id == articleRequest.Id, cancellationToken);
+            await _articleRepository
+                .RemoveAsync(a => a.Name == articleRequest.Name, cancellationToken)
+                .ConfigureAwait(false);
         }
 
+        /// <inheritdoc/>
         public async Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default)
         {
             return await _articleRepository.AnyAsync(a => a.Id == id, cancellationToken);
         }
 
-        public async Task<IEnumerable<ArticleResponse>> GetAsync(Expression<Func<ArticleRequest, bool>>? predicate = null, Func<IQueryable<ArticleRequest>, IOrderedQueryable<ArticleRequest>>? orderBy = null, CancellationToken cancellationToken = default)
+        /// <inheritdoc/>
+        public async Task<ArticleResponse?> FirstOrDefault(
+            Expression<Func<ArticleRequest, bool>>? predicate = null,
+            CancellationToken cancellationToken = default)
         {
             var articlePredicate = predicate?.ConvertTo<ArticleRequest, Article>();
-            var articles = await _articleRepository.GetAsync(articlePredicate, orderBy?.ConvertTo<ArticleRequest, Article>(), cancellationToken);
+            var article = await _articleRepository.FirstOrDefaultAsync(articlePredicate, 
+                cancellationToken);
+
+            if (article == null)
+            {
+                return null;
+            }
+
+            return new ArticleResponse
+            {
+                Id = article.Id,
+                Name = article.Name,
+                Description = article.Description,
+                Category = article.Category,
+                CreatedBy = article.CreatedBy,
+                CreatedAt = article.CreatedAt,
+                ModifiedBy = article.ModifiedBy,
+                ModifiedAt = article.ModifiedAt
+            };
+        }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<ArticleResponse>> GetAsync(Expression<Func<ArticleRequest, bool>>? 
+            predicate = null, Func<IQueryable<ArticleRequest>, IOrderedQueryable<ArticleRequest>>? 
+            orderBy = null, CancellationToken cancellationToken = default)
+        {
+            var articlePredicate = predicate?.ConvertTo<ArticleRequest, Article>();
+            var articles = await _articleRepository.GetAsync(articlePredicate, orderBy?
+                .ConvertTo<ArticleRequest, Article>(), cancellationToken);
 
             return articles.Select(a => new ArticleResponse
             {
@@ -80,6 +120,7 @@ namespace home_wiki_backend.BL.Services
             });
         }
 
+        /// <inheritdoc/>
         public async Task<ArticleResponse> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
             var article = await _articleRepository.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
@@ -93,7 +134,14 @@ namespace home_wiki_backend.BL.Services
                 Id = article.Id,
                 Name = article.Name,
                 Description = article.Description,
-                Category = article.Category,
+                Category = new CategoryResponse()
+                {
+                    Name = article.Category.Name,
+                    CreatedAt = article.Category.CreatedAt,
+                    CreatedBy = article.Category.CreatedBy,
+                    ModifiedAt = article.Category.ModifiedAt,
+                    ModifiedBy = article.Category.ModifiedBy,
+                },
                 CreatedBy = article.CreatedBy,
                 CreatedAt = article.CreatedAt,
                 ModifiedBy = article.ModifiedBy,
@@ -101,25 +149,50 @@ namespace home_wiki_backend.BL.Services
             };
         }
 
-        public async Task<IEnumerable<ArticleResponse>> GetPagedAsync(int pageNumber, int pageSize, Expression<Func<ArticleRequest, bool>>? predicate = null, Func<IQueryable<ArticleRequest>, IOrderedQueryable<ArticleRequest>>? orderBy = null, CancellationToken cancellationToken = default)
+        /// <inheritdoc/>
+        public async Task<PagedList<ArticleResponse>> GetPagedAsync(int pageNumber, int pageSize,
+            Expression<Func<ArticleRequest, bool>>? predicate = null, Func<IQueryable<ArticleRequest>, 
+                IOrderedQueryable<ArticleRequest>>? orderBy = null, CancellationToken cancellationToken = default)
         {
             var articlePredicate = predicate?.ConvertTo<ArticleRequest, Article>();
-            var pagedArticles = await _articleRepository.GetPagedAsync(pageNumber, pageSize, articlePredicate, orderBy?.ConvertTo<ArticleRequest, Article>(), cancellationToken);
+            var pagedArticles = await _articleRepository
+                .GetPagedAsync(pageNumber, pageSize, 
+                articlePredicate, orderBy?.ConvertTo<ArticleRequest, Article>(), cancellationToken);
 
-            return pagedArticles.Items.Select(a => new ArticleResponse
+            var elementResponse = pagedArticles?.Items?.Select(a => new ArticleResponse
             {
                 Id = a.Id,
                 Name = a.Name,
                 Description = a.Description,
-                Category = a.Category,
+                Category = new CategoryResponse() 
+                {
+                    Name = a.Category.Name, 
+                    CreatedAt = a.Category.CreatedAt,
+                    CreatedBy = a.Category.CreatedBy,
+                    ModifiedAt = a.Category.ModifiedAt,
+                    ModifiedBy = a.Category.ModifiedBy,
+                },
                 CreatedBy = a.CreatedBy,
                 CreatedAt = a.CreatedAt,
                 ModifiedBy = a.ModifiedBy,
                 ModifiedAt = a.ModifiedAt
-            });
+            }) ?? Array.Empty<ArticleResponse>();
+
+            return new PagedList<ArticleResponse>()
+            {
+                PageNumber = pagedArticles!.PageNumber,
+                PageSize = pagedArticles!.PageNumber,
+                PageCount = pagedArticles!.PageCount,
+                HasNextPage = pagedArticles!.HasNextPage,
+                HasPreviousPage = pagedArticles!.HasPreviousPage,
+                Items = elementResponse,
+                TotalItemCount = pagedArticles!.TotalItemCount
+            };
         }
 
-        public async Task<ArticleResponse> UpdateAsync(ArticleRequest articleRequest, CancellationToken cancellationToken = default)
+        /// <inheritdoc/>
+        public async Task<ArticleResponse> UpdateAsync(ArticleRequest articleRequest,
+            CancellationToken cancellationToken = default)
         {
             var article = await _articleRepository.FirstOrDefaultAsync(a => a.Id == articleRequest.Id, cancellationToken);
             if (article == null)
@@ -127,23 +200,29 @@ namespace home_wiki_backend.BL.Services
                 throw new KeyNotFoundException($"Article with ID {articleRequest.Id} not found.");
             }
 
-            article.Name = articleRequest.Name;
-            article.Description = articleRequest.Description;
-            article.CategoryId = articleRequest.CategoryId;
-            article.ModifiedBy = articleRequest.ModifiedBy;
-            article.ModifiedAt = DateTime.UtcNow;
+            var updatedArticle = new Article()
+            {
+                Id = articleRequest.Id,
+                Name = articleRequest.Name,
+                Description = articleRequest.Description,
+                CategoryId = articleRequest.CategoryId,
+                CreatedBy = article.CreatedBy,
+                CreatedAt = article.CreatedAt,
+                ModifiedBy = articleRequest.ModifiedBy,
+                ModifiedAt = DateTime.UtcNow
+            };
 
-            await _articleRepository.UpdateAsync(article, cancellationToken);
+            await _articleRepository.UpdateAsync(updatedArticle, cancellationToken);
 
             return new ArticleResponse
             {
-                Id = article.Id,
-                Name = article.Name,
-                Description = article.Description,
-                Category = article.Category,
-                CreatedBy = article.CreatedBy,
-                CreatedAt = article.CreatedAt,
-                ModifiedBy = article.ModifiedBy,
+                Id = updatedArticle.Id,
+                Name = updatedArticle.Name,
+                Description = updatedArticle.Description,
+                Category = updatedArticle.Category,
+                CreatedBy = updatedArticle.CreatedBy,
+                CreatedAt = updatedArticle.CreatedAt,
+                ModifiedBy = updatedArticle.ModifiedBy,
                 ModifiedAt = article.ModifiedAt
             };
         }
@@ -151,7 +230,8 @@ namespace home_wiki_backend.BL.Services
 
     public static class ExpressionExtensions
     {
-        public static Expression<Func<TDestination, bool>>? ConvertTo<TSource, TDestination>(this Expression<Func<TSource, bool>>? source)
+        public static Expression<Func<TDestination, bool>>? ConvertTo<TSource, 
+            TDestination>(this Expression<Func<TSource, bool>>? source)
         {
             if (source == null) return null;
 
@@ -160,11 +240,13 @@ namespace home_wiki_backend.BL.Services
             return Expression.Lambda<Func<TDestination, bool>>(body!, parameter);
         }
 
-        public static Func<IQueryable<TDestination>, IOrderedQueryable<TDestination>>? ConvertTo<TSource, TDestination>(this Func<IQueryable<TSource>, IOrderedQueryable<TSource>>? source)
+        public static Func<IQueryable<TDestination>, IOrderedQueryable<TDestination>>? 
+            ConvertTo<TSource, TDestination>(this Func<IQueryable<TSource>, IOrderedQueryable<TSource>>? source)
         {
             if (source == null) return null;
 
-            return query => source(query.Cast<TSource>()).Cast<TDestination>();
+            return query => (IOrderedQueryable<TDestination>)source(query.Cast<TSource>())
+            .Cast<TDestination>();
         }
     }
 

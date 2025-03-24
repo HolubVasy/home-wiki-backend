@@ -4,6 +4,7 @@ using home_wiki_backend.DAL.Common.Models.Paginations;
 using home_wiki_backend.DAL.Data;
 using home_wiki_backend.DAL.Exceptions;
 using home_wiki_backend.Shared.Contracts;
+using home_wiki_backend.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace home_wiki_backend.DAL.Repositories;
@@ -51,14 +52,22 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
     }
 
     /// <inheritdoc/>
-    public async Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>> predicate,
+    public async Task<TEntity?> FirstOrDefaultAsync(Expression<Func<TEntity, bool>>? predicate = default,
         CancellationToken cancellationToken = default)
     {
         try
         {
-            return await _dbSet
-                .AsNoTracking()
-                .FirstOrDefaultAsync(predicate, cancellationToken)
+            var query = _dbSet.AsNoTracking();
+
+            if (predicate is not null)
+            {
+                return await query
+                    .FirstOrDefaultAsync(predicate, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+
+            return await query
+                .FirstOrDefaultAsync(cancellationToken)
                 .ConfigureAwait(false);
         }
         catch (Exception ex)
@@ -143,6 +152,15 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
     {
         try
         {
+            var beforeUpdate = await _dbSet.FirstOrDefaultAsync(e => e.Id == entity.Id);
+            if (beforeUpdate is null)
+            {
+                throw new InvalidOperationException($"Entity with ID: `{entity.Id}` " +
+                    $"not found in the database.");
+            }
+
+            _context.Entry(beforeUpdate).State = EntityState.Detached;
+            _context.Entry(entity).State = EntityState.Modified;
             _dbSet.Update(entity);
             await _context.SaveChangesAsync(cancellationToken)
                 .ConfigureAwait(false);
@@ -156,30 +174,20 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
     }
 
     /// <inheritdoc/>
-    public async Task RemoveAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
+    public async Task RemoveAsync(Expression<Func<TEntity, bool>>? predicate = default,
+        CancellationToken cancellationToken = default)
     {
-        try
+        var query = _dbSet.AsQueryable();
+
+        if (predicate is not null)
         {
-            var entityToRemove = await _dbSet
-                .FirstOrDefaultAsync(predicate, cancellationToken)
-                .ConfigureAwait(false);
-            if (entityToRemove != null)
-            {
-                if (_context.Entry(entityToRemove).State == EntityState.Detached)
-                {
-                    _dbSet.Attach(entityToRemove);
-                    _dbSet.Remove(entityToRemove);
-                    await _context.SaveChangesAsync(cancellationToken)
-                        .ConfigureAwait(false);
-                }
-            }
+            query = query.Where(predicate);
         }
-        catch (Exception ex)
-        {
-            throw new GenericRepositoryException(
-                $"An error occurred while removing an entity of type `{typeof(TEntity).Name}`.",
-                ex);
-        }
+
+        var entityToRemove = await query
+            .FirstOrDefaultAsync(cancellationToken)
+            .ConfigureAwait(false);
+        await RemoveEntityAsync(entityToRemove, cancellationToken);
     }
 
     /// <inheritdoc/>
@@ -312,7 +320,7 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
                 PageSize = pageSize,
                 HasPreviousPage = pageNumber > 1,
                 HasNextPage = pageNumber < (int)Math.Ceiling(totalItemCount / (double)pageSize),
-                Items = elements
+                Items = elements is null ? Array.Empty<TEntity>() : elements.AsReadOnly()
             };
         }
         catch (Exception ex)
@@ -332,5 +340,38 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
                 ((MemberExpression)unaryExpression.Operand).Member.Name,
             _ => throw new ArgumentException("Expression is not a member access", nameof(expression))
         };
+    }
+
+    public async Task<TEntity?> FindAsync(
+        int id, CancellationToken cancellationToken = default)
+    {
+        return await _dbSet.FindAsync(id);
+    }
+
+    public async Task RemoveAsync(TEntity? entity, CancellationToken cancellationToken = default)
+    {
+        await RemoveEntityAsync(entity, cancellationToken)
+            .ConfigureAwait(false);
+    }
+
+    private async Task RemoveEntityAsync(TEntity? entity,
+       CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (entity is not null && _context.Entry(entity).State == EntityState.Detached)
+            {
+                _dbSet.Attach(entity);
+                _dbSet.Remove(entity);
+                await _context.SaveChangesAsync(cancellationToken)
+                    .ConfigureAwait(false);
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new GenericRepositoryException(
+                $"An error occurred while removing an entity of type `{typeof(TEntity).Name}`.",
+                ex);
+        }
     }
 }

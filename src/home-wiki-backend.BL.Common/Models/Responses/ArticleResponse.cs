@@ -5,9 +5,6 @@ namespace home_wiki_backend.BL.Common.Models.Requests
 {
     public sealed class ArticleResponse : ArticleBase, IIdentifier, IAuditable
     {
-        /// <inheritdoc/>
-        public int Id { get; init; }
-
         #region Entity relationships
 
         /// <summary>

@@ -3,7 +3,7 @@ using home_wiki_backend.Shared.Models;
 
 namespace home_wiki_backend.BL.Common.Models.Requests
 {
-    public sealed class CategoryResponse : CategoryBase, IAuditable
+    public sealed class CategoryResponse : CategoryBase, IAuditable, IIdentifier
     {
         #region Auditable properties
 

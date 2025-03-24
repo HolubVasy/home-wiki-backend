@@ -1,4 +1,4 @@
-﻿namespace home_wiki_backend.DAL.Common.Models.Paginations
+﻿namespace home_wiki_backend.Shared.Models
 {
     /// <summary>  
     /// Represents a paginated list of items.  

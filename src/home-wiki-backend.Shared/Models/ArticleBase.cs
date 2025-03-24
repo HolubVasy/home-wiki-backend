@@ -5,8 +5,16 @@ namespace home_wiki_backend.Shared.Models
     /// <summary>
     ///     Represents the base class for an article.
     /// </summary>
-    public abstract class ArticleBase : IName
+    public abstract class ArticleBase : IName, IIdentifier
     {
+
+        #region Identity
+
+        /// <inheritdoc/>
+        public int Id { get; init; }
+
+        #endregion
+
         /// <summary>
         ///     Gets the description of the article.
         /// </summary>
