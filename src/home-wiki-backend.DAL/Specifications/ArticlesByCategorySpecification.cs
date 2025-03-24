@@ -15,7 +15,7 @@ public sealed class ArticlesByCategorySpecification :
     {
         // Include the related Category and Tags
         AddInclude(a => a.Category);
-        AddInclude(a => a.Tags);
+        AddInclude(a => a.Tags!);
 
         // Optionally, apply ordering
         ApplyOrderBy(a => a.Name);

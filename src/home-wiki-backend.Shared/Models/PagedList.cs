@@ -39,6 +39,21 @@
         /// <summary>  
         /// Gets the list of items.  
         /// </summary>  
-        public IEnumerable<T>? Items { get; set; }
+        public IEnumerable<T> Items { get; init; } = null!;
+
+        /// <summary>
+        /// Gets an empty instance of <see cref="PagedList{T}"/>.
+        /// </summary>
+        public static PagedList<T> Empty =>
+            new PagedList<T>
+            {
+                PageCount = 0,
+                TotalItemCount = 0,
+                PageNumber = 0,
+                PageSize = 0,
+                HasPreviousPage = false,
+                HasNextPage = false,
+                Items = Array.Empty<T>()
+            };
     }
 }
