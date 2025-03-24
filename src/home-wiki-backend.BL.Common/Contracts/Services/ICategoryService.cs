@@ -40,7 +40,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// </returns>
         Task<ResultModels<CategoryResponse>> GetAsync(
             Expression<Func<CategoryRequest, bool>>? predicate = default,
-            Func<IQueryable<CategoryRequest>, 
+            Func<IQueryable<CategoryRequest>,
                 IOrderedQueryable<CategoryRequest>>? orderBy = default,
             CancellationToken cancellationToken = default);
 
@@ -57,7 +57,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         Task<ResultModels<CategoryResponse>> GetPagedAsync(
             int pageNumber, int pageSize,
             Expression<Func<CategoryRequest, bool>>? predicate = default,
-            Func<IQueryable<CategoryRequest>, 
+            Func<IQueryable<CategoryRequest>,
                 IOrderedQueryable<CategoryRequest>>? orderBy = default,
             CancellationToken cancellationToken = default);
 

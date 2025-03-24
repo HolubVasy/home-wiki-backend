@@ -23,15 +23,15 @@ namespace home_wiki_backend
             {
                 var builder = WebApplication.CreateBuilder(args);
 
-                // Use Serilog instead of default logging
-                Log.Logger = new LoggerConfiguration()
-                    .ReadFrom.Configuration(builder.Configuration)
-                    .Enrich.FromLogContext()
-                    .CreateLogger();
-
-                builder.Host.UseSerilog();
 
                 builder.Services.ConfigureDependencyInjection();
+
+                // Use Serilog instead of default logging
+                Log.Logger = new LoggerConfiguration()
+                    .WriteTo.Console()
+                        .CreateLogger();
+
+                builder.Host.UseSerilog();
 
                 // Register DbContext with Azure SQL connection string
                 var connectionString = builder.Configuration
@@ -67,14 +67,6 @@ namespace home_wiki_backend
                 builder.Services.AddEndpointsApiExplorer();
 
                 var app = builder.Build();
-
-                // Auto-apply migrations
-                using (var scope = app.Services.CreateScope())
-                {
-                    var db = scope.ServiceProvider.GetRequiredService<DbWikiContext>();
-                    db.Database.Migrate();
-                }
-
                 // Enable CORS globally
                 app.UseCors("AllowAll");
 
@@ -89,14 +81,14 @@ namespace home_wiki_backend
 
                 app.UseHttpsRedirection();
 
-                app.UseMiddleware<ExceptionMiddleware>();
+                // app.UseMiddleware<ExceptionMiddleware>();
 
                 app.UseAuthorization();
 
                 app.MapControllers();
 
                 // Auto-apply migrations
-                app.ApplyMigrationsAndSeed();
+                // app.ApplyMigrationsAndSeed();
 
                 app.Run();
             }

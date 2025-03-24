@@ -40,9 +40,9 @@ namespace home_wiki_backend.BL.Services
                     CreatedBy = "system",
                     CreatedAt = DateTime.UtcNow
                 };
-                var created = await _tagRepo.AddAsync(newTag, 
+                var created = await _tagRepo.AddAsync(newTag,
                     cancellationToken);
-                _logger.LogInformation("Tag created with ID: {Id}", 
+                _logger.LogInformation("Tag created with ID: {Id}",
                     created.Id);
                 return new ResultModel<TagResponse>
                 {
@@ -68,7 +68,7 @@ namespace home_wiki_backend.BL.Services
                     Success = false,
                     Message = "Error creating tag",
                     Code = StatusCodes.Status500InternalServerError,
-                    Error = new ErrorResultModel(ex.Message, 
+                    Error = new ErrorResultModel(ex.Message,
                     ErrorCode.Unexpected)
                 };
             }
@@ -92,7 +92,7 @@ namespace home_wiki_backend.BL.Services
                         Success = false,
                         Message = $"Tag with ID {id} not found.",
                         Code = StatusCodes.Status404NotFound,
-                        Error = new ErrorResultModel("Not found", 
+                        Error = new ErrorResultModel("Not found",
                         ErrorCode.Unexpected)
                     };
                 }
@@ -130,7 +130,7 @@ namespace home_wiki_backend.BL.Services
         /// <inheritdoc/>
         public async Task<ResultModels<TagResponse>> GetAsync(
             Expression<Func<TagRequest, bool>>? predicate = null,
-            Func<IQueryable<TagRequest>, 
+            Func<IQueryable<TagRequest>,
                 IOrderedQueryable<TagRequest>>? orderBy = null,
             CancellationToken cancellationToken = default)
         {
@@ -177,7 +177,7 @@ namespace home_wiki_backend.BL.Services
             int pageNumber,
             int pageSize,
             Expression<Func<TagRequest, bool>>? predicate = null,
-            Func<IQueryable<TagRequest>, 
+            Func<IQueryable<TagRequest>,
                 IOrderedQueryable<TagRequest>>? orderBy = null,
             CancellationToken cancellationToken = default)
         {
@@ -187,7 +187,7 @@ namespace home_wiki_backend.BL.Services
                     "{PageNumber}, Size: {PageSize}",
                     pageNumber, pageSize);
                 var pred = predicate?.ConvertTo<TagRequest, Tag>();
-                var paged = await _tagRepo.GetPagedAsync(pageNumber, 
+                var paged = await _tagRepo.GetPagedAsync(pageNumber,
                     pageSize, pred,
                     orderBy?.ConvertTo<TagRequest, Tag>(), cancellationToken);
                 var data = paged.Items.Select(t => new TagResponse
@@ -239,7 +239,7 @@ namespace home_wiki_backend.BL.Services
                         Success = false,
                         Message = $"Tag with ID {tag.Id} not found.",
                         Code = StatusCodes.Status404NotFound,
-                        Error = new ErrorResultModel("Not found", 
+                        Error = new ErrorResultModel("Not found",
                         ErrorCode.Unexpected)
                     };
                 }
@@ -277,7 +277,7 @@ namespace home_wiki_backend.BL.Services
                     Success = false,
                     Message = "Error updating tag",
                     Code = StatusCodes.Status500InternalServerError,
-                    Error = new ErrorResultModel(ex.Message, 
+                    Error = new ErrorResultModel(ex.Message,
                     ErrorCode.Unexpected)
                 };
             }
@@ -291,7 +291,7 @@ namespace home_wiki_backend.BL.Services
             try
             {
                 _logger.LogInformation("Deleting tag ID: {Id}", id);
-                await _tagRepo.RemoveAsync(t => t.Id == id, 
+                await _tagRepo.RemoveAsync(t => t.Id == id,
                     cancellationToken);
                 return new ResultModel<TagResponse>
                 {
@@ -309,7 +309,7 @@ namespace home_wiki_backend.BL.Services
                     Success = false,
                     Message = "Error deleting tag",
                     Code = StatusCodes.Status500InternalServerError,
-                    Error = new ErrorResultModel(ex.Message, 
+                    Error = new ErrorResultModel(ex.Message,
                     ErrorCode.Unexpected)
                 };
             }
@@ -324,7 +324,7 @@ namespace home_wiki_backend.BL.Services
             {
                 _logger.LogInformation("Removing tag: {Name}",
                     tag.Name);
-                await _tagRepo.RemoveAsync(t => t.Name == tag.Name, 
+                await _tagRepo.RemoveAsync(t => t.Name == tag.Name,
                     cancellationToken);
                 return new ResultModel<TagResponse>
                 {
@@ -356,7 +356,7 @@ namespace home_wiki_backend.BL.Services
         {
             try
             {
-                return await _tagRepo.AnyAsync(t => t.Id == id, 
+                return await _tagRepo.AnyAsync(t => t.Id == id,
                     cancellationToken);
             }
             catch (Exception ex)
@@ -392,7 +392,7 @@ namespace home_wiki_backend.BL.Services
             try
             {
                 var pred = predicate?.ConvertTo<TagRequest, Tag>();
-                var tag = await _tagRepo.FirstOrDefaultAsync(pred, 
+                var tag = await _tagRepo.FirstOrDefaultAsync(pred,
                     cancellationToken);
                 if (tag == null)
                 {
@@ -401,7 +401,7 @@ namespace home_wiki_backend.BL.Services
                         Success = false,
                         Message = "No matching tag found",
                         Code = StatusCodes.Status404NotFound,
-                        Error = new ErrorResultModel("Not found", 
+                        Error = new ErrorResultModel("Not found",
                         ErrorCode.Unexpected)
                     };
                 }
@@ -429,7 +429,7 @@ namespace home_wiki_backend.BL.Services
                     Success = false,
                     Message = "Error retrieving first tag",
                     Code = StatusCodes.Status500InternalServerError,
-                    Error = new ErrorResultModel(ex.Message, 
+                    Error = new ErrorResultModel(ex.Message,
                     ErrorCode.Unexpected)
                 };
             }
@@ -444,7 +444,7 @@ namespace home_wiki_backend.BL.Services
             {
                 _logger.LogInformation("Retrieving tags " +
                     "via specification.");
-                var tags = await _tagRepo.ListAsync(specification, 
+                var tags = await _tagRepo.ListAsync(specification,
                     cancellationToken);
                 var data = tags.Select(t => new TagResponse
                 {

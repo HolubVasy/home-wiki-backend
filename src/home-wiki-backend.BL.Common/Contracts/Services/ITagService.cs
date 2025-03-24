@@ -41,7 +41,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// </returns>
         Task<ResultModels<TagResponse>> GetAsync(
             Expression<Func<TagRequest, bool>>? predicate = default,
-            Func<IQueryable<TagRequest>, 
+            Func<IQueryable<TagRequest>,
                 IOrderedQueryable<TagRequest>>? orderBy = default,
             CancellationToken cancellationToken = default);
 
@@ -57,7 +57,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         Task<ResultModels<TagResponse>> GetPagedAsync(
             int pageNumber, int pageSize,
             Expression<Func<TagRequest, bool>>? predicate = default,
-            Func<IQueryable<TagRequest>, 
+            Func<IQueryable<TagRequest>,
                 IOrderedQueryable<TagRequest>>? orderBy = default,
             CancellationToken cancellationToken = default);
 

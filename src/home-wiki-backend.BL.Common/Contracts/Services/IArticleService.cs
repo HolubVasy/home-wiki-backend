@@ -65,7 +65,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         Task<ResultModels<ArticleResponse>> GetPagedAsync(
             int pageNumber, int pageSize,
             Expression<Func<ArticleRequest, bool>>? predicate = default,
-            Func<IQueryable<ArticleRequest>, 
+            Func<IQueryable<ArticleRequest>,
                 IOrderedQueryable<ArticleRequest>>? orderBy = default,
             CancellationToken cancellationToken = default);
 

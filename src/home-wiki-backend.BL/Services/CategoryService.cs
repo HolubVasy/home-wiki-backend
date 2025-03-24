@@ -41,7 +41,7 @@ namespace home_wiki_backend.BL.Services
                     CreatedBy = "system",
                     CreatedAt = DateTime.UtcNow
                 };
-                var created = await _catRepo.AddAsync(newCat, 
+                var created = await _catRepo.AddAsync(newCat,
                     cancellationToken);
                 _logger.LogInformation("Category created with ID: {Id}",
                     created.Id);
@@ -95,7 +95,7 @@ namespace home_wiki_backend.BL.Services
                         Success = false,
                         Message = $"Category with ID {id} not found.",
                         Code = StatusCodes.Status404NotFound,
-                        Error = new ErrorResultModel("Not found", 
+                        Error = new ErrorResultModel("Not found",
                         ErrorCode.Unexpected)
                     };
                 }
@@ -140,7 +140,7 @@ namespace home_wiki_backend.BL.Services
             try
             {
                 _logger.LogInformation("Getting category list.");
-                var pred = predicate?.ConvertTo<CategoryRequest, 
+                var pred = predicate?.ConvertTo<CategoryRequest,
                     Category>();
                 var cats = await _catRepo.GetAsync(pred,
                     orderBy?.ConvertTo<CategoryRequest, Category>(),
@@ -177,13 +177,13 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModels<CategoryResponse>> 
+        public async Task<ResultModels<CategoryResponse>>
             GetPagedAsync(
             int pageNumber,
             int pageSize,
             Expression<Func<CategoryRequest,
                 bool>>? predicate = null,
-            Func<IQueryable<CategoryRequest>, 
+            Func<IQueryable<CategoryRequest>,
                 IOrderedQueryable<CategoryRequest>>? orderBy = null,
             CancellationToken cancellationToken = default)
         {
@@ -193,7 +193,7 @@ namespace home_wiki_backend.BL.Services
                     "Page: {PageNumber}, Size: {PageSize}",
                     pageNumber, pageSize);
                 var pred = predicate?.ConvertTo<CategoryRequest, Category>();
-                var paged = await _catRepo.GetPagedAsync(pageNumber, 
+                var paged = await _catRepo.GetPagedAsync(pageNumber,
                     pageSize, pred,
                     orderBy?.ConvertTo<CategoryRequest,
                     Category>(), cancellationToken);
@@ -222,7 +222,7 @@ namespace home_wiki_backend.BL.Services
                     Success = false,
                     Message = "Error retrieving paged categories",
                     Code = StatusCodes.Status500InternalServerError,
-                    Error = new ErrorResultModel(ex.Message, 
+                    Error = new ErrorResultModel(ex.Message,
                     ErrorCode.Unexpected)
                 };
             }
@@ -235,7 +235,7 @@ namespace home_wiki_backend.BL.Services
         {
             try
             {
-                _logger.LogInformation("Updating category ID: {Id}", 
+                _logger.LogInformation("Updating category ID: {Id}",
                     category.Id);
                 var exist = await _catRepo.FirstOrDefaultAsync(
                     c => c.Id == category.Id, cancellationToken);
@@ -249,7 +249,7 @@ namespace home_wiki_backend.BL.Services
                         Message = $"Category with ID {category.Id} " +
                         $"not found.",
                         Code = StatusCodes.Status404NotFound,
-                        Error = new ErrorResultModel("Not found", 
+                        Error = new ErrorResultModel("Not found",
                         ErrorCode.Unexpected)
                     };
                 }
@@ -281,14 +281,14 @@ namespace home_wiki_backend.BL.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating category ID: {Id}", 
+                _logger.LogError(ex, "Error updating category ID: {Id}",
                     category.Id);
                 return new ResultModel<CategoryResponse>
                 {
                     Success = false,
                     Message = "Error updating category",
                     Code = StatusCodes.Status500InternalServerError,
-                    Error = new ErrorResultModel(ex.Message, 
+                    Error = new ErrorResultModel(ex.Message,
                     ErrorCode.Unexpected)
                 };
             }
@@ -322,7 +322,7 @@ namespace home_wiki_backend.BL.Services
                     Success = false,
                     Message = "Error deleting category",
                     Code = StatusCodes.Status500InternalServerError,
-                    Error = new ErrorResultModel(ex.Message, 
+                    Error = new ErrorResultModel(ex.Message,
                     ErrorCode.Unexpected)
                 };
             }
@@ -335,7 +335,7 @@ namespace home_wiki_backend.BL.Services
         {
             try
             {
-                _logger.LogInformation("Removing category: {Name}", 
+                _logger.LogInformation("Removing category: {Name}",
                     category.Name);
                 await _catRepo.RemoveAsync(c => c.Name == category.Name,
                     cancellationToken);
@@ -356,7 +356,7 @@ namespace home_wiki_backend.BL.Services
                     Success = false,
                     Message = "Error removing category",
                     Code = StatusCodes.Status500InternalServerError,
-                    Error = new ErrorResultModel(ex.Message, 
+                    Error = new ErrorResultModel(ex.Message,
                     ErrorCode.Unexpected)
                 };
             }
@@ -369,7 +369,7 @@ namespace home_wiki_backend.BL.Services
         {
             try
             {
-                return await _catRepo.AnyAsync(c => c.Id == id, 
+                return await _catRepo.AnyAsync(c => c.Id == id,
                     cancellationToken);
             }
             catch (Exception ex)
@@ -407,7 +407,7 @@ namespace home_wiki_backend.BL.Services
             {
                 var pred = predicate?.ConvertTo<CategoryRequest,
                     Category>();
-                var cat = await _catRepo.FirstOrDefaultAsync(pred, 
+                var cat = await _catRepo.FirstOrDefaultAsync(pred,
                     cancellationToken);
                 if (cat == null)
                 {
@@ -416,7 +416,7 @@ namespace home_wiki_backend.BL.Services
                         Success = false,
                         Message = "No matching category found",
                         Code = StatusCodes.Status404NotFound,
-                        Error = new ErrorResultModel("Not found", 
+                        Error = new ErrorResultModel("Not found",
                         ErrorCode.Unexpected)
                     };
                 }
@@ -460,7 +460,7 @@ namespace home_wiki_backend.BL.Services
             {
                 _logger.LogInformation("Retrieving categories " +
                     "via specification.");
-                var cats = await _catRepo.ListAsync(specification, 
+                var cats = await _catRepo.ListAsync(specification,
                     cancellationToken);
                 var data = cats.Select(c => new CategoryResponse
                 {
@@ -488,7 +488,7 @@ namespace home_wiki_backend.BL.Services
                     Success = false,
                     Message = "Error retrieving categories by specification",
                     Code = StatusCodes.Status500InternalServerError,
-                    Error = new ErrorResultModel(ex.Message, 
+                    Error = new ErrorResultModel(ex.Message,
                     ErrorCode.Unexpected)
                 };
             }
