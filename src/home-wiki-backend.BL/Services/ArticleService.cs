@@ -3,6 +3,7 @@ using home_wiki_backend.BL.Common.Models.Requests;
 using home_wiki_backend.DAL.Common.Contracts;
 using home_wiki_backend.DAL.Common.Models.Entities;
 using home_wiki_backend.Shared.Models;
+using Microsoft.Extensions.Logging;
 using System.Linq.Expressions;
 
 namespace home_wiki_backend.BL.Services
@@ -11,23 +12,29 @@ namespace home_wiki_backend.BL.Services
     public sealed class ArticleService : IArticleService
     {
         private readonly IGenericRepository<Article> _articleRepository;
+        private readonly ILogger<ArticleService> _logger;
 
-        public ArticleService(IGenericRepository<Article> articleRepository)
+        public ArticleService(
+            IGenericRepository<Article> articleRepository,
+            ILogger<ArticleService> logger)
         {
             _articleRepository = articleRepository;
+            _logger = logger;
         }
 
         public async Task<bool> AnyAsync(Expression<Func<ArticleRequest, bool>>? predicate = null,
             CancellationToken cancellationToken = default)
         {
             var articlePredicate = predicate?.ConvertTo<ArticleRequest, Article>();
+            _logger.LogDebug("Checking if any article exists with the specified predicate.");
             return await _articleRepository.AnyAsync(articlePredicate, cancellationToken);
         }
 
-        /// <inheritdoc/>
         public async Task<ArticleResponse> CreateAsync(ArticleRequest articleRequest,
             CancellationToken cancellationToken = default)
         {
+            _logger.LogInformation("Creating new article: {Name}", articleRequest.Name);
+
             var article = new Article
             {
                 Name = articleRequest.Name,
@@ -38,6 +45,9 @@ namespace home_wiki_backend.BL.Services
             };
 
             var createdArticle = await _articleRepository.AddAsync(article, cancellationToken);
+
+            _logger.LogInformation("Article created with ID: {Id}", createdArticle.Id);
+
             return new ArticleResponse
             {
                 Id = createdArticle.Id,
@@ -49,39 +59,36 @@ namespace home_wiki_backend.BL.Services
             };
         }
 
-        /// <inheritdoc/>
         public async Task DeleteAsync(int id, CancellationToken cancellationToken = default)
         {
-            await _articleRepository
-                .RemoveAsync(a => a.Id == id, cancellationToken);
+            _logger.LogInformation("Deleting article with ID: {Id}", id);
+            await _articleRepository.RemoveAsync(a => a.Id == id, cancellationToken);
         }
 
-        /// <inheritdoc/>
         public async Task RemoveAsync(ArticleRequest articleRequest,
             CancellationToken cancellationToken = default)
         {
-            await _articleRepository
-                .RemoveAsync(a => a.Name == articleRequest.Name, cancellationToken)
-                .ConfigureAwait(false);
+            _logger.LogInformation("Removing article with name: {Name}", articleRequest.Name);
+            await _articleRepository.RemoveAsync(a => a.Name == articleRequest.Name, cancellationToken);
         }
 
-        /// <inheritdoc/>
         public async Task<bool> ExistsAsync(int id, CancellationToken cancellationToken = default)
         {
+            _logger.LogDebug("Checking existence of article ID: {Id}", id);
             return await _articleRepository.AnyAsync(a => a.Id == id, cancellationToken);
         }
 
-        /// <inheritdoc/>
         public async Task<ArticleResponse?> FirstOrDefault(
             Expression<Func<ArticleRequest, bool>>? predicate = null,
             CancellationToken cancellationToken = default)
         {
+            _logger.LogInformation("Fetching first article matching specified condition...");
             var articlePredicate = predicate?.ConvertTo<ArticleRequest, Article>();
-            var article = await _articleRepository.FirstOrDefaultAsync(articlePredicate, 
-                cancellationToken);
+            var article = await _articleRepository.FirstOrDefaultAsync(articlePredicate, cancellationToken);
 
             if (article == null)
             {
+                _logger.LogWarning("No article found matching the specified predicate.");
                 return null;
             }
 
@@ -98,14 +105,15 @@ namespace home_wiki_backend.BL.Services
             };
         }
 
-        /// <inheritdoc/>
-        public async Task<IEnumerable<ArticleResponse>> GetAsync(Expression<Func<ArticleRequest, bool>>? 
-            predicate = null, Func<IQueryable<ArticleRequest>, IOrderedQueryable<ArticleRequest>>? 
-            orderBy = null, CancellationToken cancellationToken = default)
+        public async Task<IEnumerable<ArticleResponse>> GetAsync(
+            Expression<Func<ArticleRequest, bool>>? predicate = null,
+            Func<IQueryable<ArticleRequest>, IOrderedQueryable<ArticleRequest>>? orderBy = null,
+            CancellationToken cancellationToken = default)
         {
+            _logger.LogInformation("Retrieving list of articles with optional filtering/sorting.");
             var articlePredicate = predicate?.ConvertTo<ArticleRequest, Article>();
-            var articles = await _articleRepository.GetAsync(articlePredicate, orderBy?
-                .ConvertTo<ArticleRequest, Article>(), cancellationToken);
+            var articles = await _articleRepository.GetAsync(articlePredicate,
+                orderBy?.ConvertTo<ArticleRequest, Article>(), cancellationToken);
 
             return articles.Select(a => new ArticleResponse
             {
@@ -120,12 +128,13 @@ namespace home_wiki_backend.BL.Services
             });
         }
 
-        /// <inheritdoc/>
         public async Task<ArticleResponse> GetByIdAsync(int id, CancellationToken cancellationToken = default)
         {
+            _logger.LogInformation("Retrieving article by ID: {Id}", id);
             var article = await _articleRepository.FirstOrDefaultAsync(a => a.Id == id, cancellationToken);
             if (article == null)
             {
+                _logger.LogWarning("Article with ID {Id} not found.", id);
                 throw new KeyNotFoundException($"Article with ID {id} not found.");
             }
 
@@ -149,24 +158,28 @@ namespace home_wiki_backend.BL.Services
             };
         }
 
-        /// <inheritdoc/>
         public async Task<PagedList<ArticleResponse>> GetPagedAsync(int pageNumber, int pageSize,
-            Expression<Func<ArticleRequest, bool>>? predicate = null, Func<IQueryable<ArticleRequest>, 
-                IOrderedQueryable<ArticleRequest>>? orderBy = null, CancellationToken cancellationToken = default)
+            Expression<Func<ArticleRequest, bool>>? predicate = null,
+            Func<IQueryable<ArticleRequest>, IOrderedQueryable<ArticleRequest>>? orderBy = null,
+            CancellationToken cancellationToken = default)
         {
-            var articlePredicate = predicate?.ConvertTo<ArticleRequest, Article>();
-            var pagedArticles = await _articleRepository
-                .GetPagedAsync(pageNumber, pageSize, 
-                articlePredicate, orderBy?.ConvertTo<ArticleRequest, Article>(), cancellationToken);
+            _logger.LogInformation("Fetching paged articles. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
 
-            var elementResponse = pagedArticles?.Items?.Select(a => new ArticleResponse
+            var articlePredicate = predicate?.ConvertTo<ArticleRequest, Article>();
+            var pagedArticles = await _articleRepository.GetPagedAsync(
+                pageNumber, pageSize,
+                articlePredicate,
+                orderBy?.ConvertTo<ArticleRequest, Article>(),
+                cancellationToken);
+
+            var articleResponses = pagedArticles?.Items?.Select(a => new ArticleResponse
             {
                 Id = a.Id,
                 Name = a.Name,
                 Description = a.Description,
-                Category = new CategoryResponse() 
+                Category = new CategoryResponse()
                 {
-                    Name = a.Category.Name, 
+                    Name = a.Category.Name,
                     CreatedAt = a.Category.CreatedAt,
                     CreatedBy = a.Category.CreatedBy,
                     ModifiedAt = a.Category.ModifiedAt,
@@ -178,34 +191,37 @@ namespace home_wiki_backend.BL.Services
                 ModifiedAt = a.ModifiedAt
             }) ?? Array.Empty<ArticleResponse>();
 
-            return new PagedList<ArticleResponse>()
+            return new PagedList<ArticleResponse>
             {
                 PageNumber = pagedArticles!.PageNumber,
-                PageSize = pagedArticles!.PageNumber,
-                PageCount = pagedArticles!.PageCount,
-                HasNextPage = pagedArticles!.HasNextPage,
-                HasPreviousPage = pagedArticles!.HasPreviousPage,
-                Items = elementResponse,
-                TotalItemCount = pagedArticles!.TotalItemCount
+                PageSize = pagedArticles.PageSize,
+                PageCount = pagedArticles.PageCount,
+                HasNextPage = pagedArticles.HasNextPage,
+                HasPreviousPage = pagedArticles.HasPreviousPage,
+                Items = articleResponses,
+                TotalItemCount = pagedArticles.TotalItemCount
             };
         }
 
-        /// <inheritdoc/>
         public async Task<ArticleResponse> UpdateAsync(ArticleRequest articleRequest,
             CancellationToken cancellationToken = default)
         {
+            _logger.LogInformation("Updating article with ID: {Id}", articleRequest.Id);
+
             var article = await _articleRepository.FirstOrDefaultAsync(a => a.Id == articleRequest.Id, cancellationToken);
             if (article == null)
             {
+                _logger.LogWarning("Article with ID {Id} not found for update.", articleRequest.Id);
                 throw new KeyNotFoundException($"Article with ID {articleRequest.Id} not found.");
             }
 
-            var updatedArticle = new Article()
+            var updatedArticle = new Article
             {
                 Id = articleRequest.Id,
                 Name = articleRequest.Name,
                 Description = articleRequest.Description,
                 CategoryId = articleRequest.CategoryId,
+                Tags = articleRequest.TagIds?.Select(t => new Tag() { Id = t }).ToHashSet(),
                 CreatedBy = article.CreatedBy,
                 CreatedAt = article.CreatedAt,
                 ModifiedBy = articleRequest.ModifiedBy,
@@ -220,10 +236,11 @@ namespace home_wiki_backend.BL.Services
                 Name = updatedArticle.Name,
                 Description = updatedArticle.Description,
                 Category = updatedArticle.Category,
+                Tags = updatedArticle.Tags?.Cast<TagBase>()?.ToHashSet(),
                 CreatedBy = updatedArticle.CreatedBy,
                 CreatedAt = updatedArticle.CreatedAt,
                 ModifiedBy = updatedArticle.ModifiedBy,
-                ModifiedAt = article.ModifiedAt
+                ModifiedAt = updatedArticle.ModifiedAt
             };
         }
     }
