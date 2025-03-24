@@ -1,8 +1,15 @@
 ﻿using home_wiki_backend.DAL.Common.Models.Entities;
 
-public class ArticlesByCategorySpecification : 
+/// <summary>
+/// Specification for retrieving articles by category.
+/// </summary>
+public class ArticlesByCategorySpecification :
     SpecificationBase<Article>
 {
+    /// <summary>
+    /// Initializes a new instance of the <see cref="ArticlesByCategorySpecification"/> class.
+    /// </summary>
+    /// <param name="categoryId">The ID of the category to filter articles by.</param>
     public ArticlesByCategorySpecification(int categoryId)
         : base(a => a.CategoryId == categoryId)
     {

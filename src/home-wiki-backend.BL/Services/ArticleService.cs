@@ -243,6 +243,32 @@ namespace home_wiki_backend.BL.Services
                 ModifiedAt = updatedArticle.ModifiedAt
             };
         }
+
+        /// <inheritdoc/>
+        public async Task<IEnumerable<ArticleResponse>> GetListAsync(ISpecification<Article> 
+            specification,
+            CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Retrieving articles using specification pattern.");
+
+            // Retrieve the list of articles that satisfy the specification
+            var articles = await _articleRepository.ListAsync(specification, cancellationToken);
+
+            // Map the articles to the response model
+            return articles.Select(a => new ArticleResponse
+            {
+                Id = a.Id,
+                Name = a.Name,
+                Description = a.Description,
+                Category = a.Category, // Depending on your mapping needs,
+                                       // you might want to map this to a CategoryResponse
+                Tags = a.Tags?.Select(t => (TagBase)t).ToHashSet(),
+                CreatedBy = a.CreatedBy,
+                CreatedAt = a.CreatedAt,
+                ModifiedBy = a.ModifiedBy,
+                ModifiedAt = a.ModifiedAt
+            });
+        }
     }
 
     public static class ExpressionExtensions
