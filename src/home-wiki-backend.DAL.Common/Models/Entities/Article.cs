@@ -8,13 +8,6 @@ namespace home_wiki_backend.DAL.Common.Models.Entities
     /// </summary>
     public sealed class Article : ArticleBase, IIdentifier, IAuditable
     {
-        #region Identity
-
-        /// <inheritdoc/>
-        public int Id { get; init; }
-
-        #endregion
-
         #region Entity relationships
 
         /// <summary>

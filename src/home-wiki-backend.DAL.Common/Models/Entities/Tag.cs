@@ -8,9 +8,6 @@ namespace home_wiki_backend.DAL.Common.Models.Entities
     /// </summary>
     public sealed class Tag : TagBase, IIdentifier, IAuditable
     {
-        /// <inheritdoc/>
-        public int Id { get; init; }
-
         #region Entity relationships
 
         /// <summary>

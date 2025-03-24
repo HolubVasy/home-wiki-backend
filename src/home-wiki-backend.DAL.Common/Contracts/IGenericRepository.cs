@@ -1,5 +1,4 @@
-﻿using home_wiki_backend.DAL.Common.Models.Paginations;
-using home_wiki_backend.Shared.Contracts;
+﻿using home_wiki_backend.Shared.Contracts;
 using home_wiki_backend.Shared.Models;
 using System.Linq.Expressions;
 
