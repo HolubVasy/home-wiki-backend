@@ -32,6 +32,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\home-wiki-backend.BL.Common\home-wiki-backend.BL.Common.csproj" />
+    <ProjectReference Include="..\home-wiki-backend.BL\home-wiki-backend.BL.csproj" />
     <ProjectReference Include="..\home-wiki-backend.DAL\home-wiki-backend.DAL.csproj" />
   </ItemGroup>
 
