@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\home-wiki-backend.DAL.Common\home-wiki-backend.DAL.Common.csproj" />
     <ProjectReference Include="..\home-wiki-backend.Shared\home-wiki-backend.Shared.csproj" />
   </ItemGroup>
 
