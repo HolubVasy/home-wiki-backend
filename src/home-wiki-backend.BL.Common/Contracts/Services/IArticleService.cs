@@ -1,12 +1,12 @@
 ﻿using home_wiki_backend.BL.Common.Models.Requests;
 using home_wiki_backend.DAL.Common.Models.Entities;
-using home_wiki_backend.Shared.Models;
+using home_wiki_backend.Shared.Models.Results.Generic;
 using System.Linq.Expressions;
 
 namespace home_wiki_backend.BL.Common.Contracts.Services
 {
     /// <summary>
-    /// Defines the contract for article service operations.
+    /// Defines the contract for article-related operations.
     /// </summary>
     public interface IArticleService
     {
@@ -14,113 +14,142 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// Creates a new article asynchronously.
         /// </summary>
         /// <param name="article">The article request model.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the created article response.</returns>
-        Task<ArticleResponse> CreateAsync(ArticleRequest article,
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task that represents the asynchronous operation. 
+        /// The task result contains the result model with the created 
+        /// article response.</returns>
+        Task<ResultModel<ArticleResponse>> CreateAsync(
+            ArticleRequest article,
             CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Gets an article by its identifier asynchronously.
         /// </summary>
-        /// <param name="id">The identifier of the article.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the article response.</returns>
-        Task<ArticleResponse> GetByIdAsync(int id,
+        /// <param name="id">The article identifier.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task that represents the asynchronous operation.
+        /// The task result contains the result model with the article 
+        /// response.</returns>
+        Task<ResultModel<ArticleResponse>> GetByIdAsync(
+            int id,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets a collection of articles that match the specified criteria asynchronously.
+        /// Gets articles based on the specified predicate and order 
+        /// asynchronously.
         /// </summary>
-        /// <param name="predicate">An expression to filter the articles.</param>
-        /// <param name="orderBy">A function to order the articles.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a collection of article responses.</returns>
-        Task<IEnumerable<ArticleResponse>> GetAsync(
+        /// <param name="predicate">The predicate to filter articles.</param>
+        /// <param name="orderBy">The function to order articles.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task that represents the asynchronous operation.
+        /// The task result contains the result models with the article 
+        /// responses.</returns>
+        Task<ResultModels<ArticleResponse>> GetAsync(
             Expression<Func<ArticleRequest, bool>>? predicate = default,
-            Func<IQueryable<ArticleRequest>, IOrderedQueryable<ArticleRequest>>? orderBy = default,
+            Func<IQueryable<ArticleRequest>, IOrderedQueryable<ArticleRequest>>?
+            orderBy = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets a paged collection of articles that match the specified criteria asynchronously.
+        /// Gets paged articles based on the specified predicate and order
+        /// asynchronously.
         /// </summary>
         /// <param name="pageNumber">The page number.</param>
-        /// <param name="pageSize">The size of the page.</param>
-        /// <param name="predicate">An expression to filter the articles.</param>
-        /// <param name="orderBy">A function to order the articles.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a collection of article responses.</returns>
-        Task<PagedList<ArticleResponse>> GetPagedAsync(
+        /// <param name="pageSize">The page size.</param>
+        /// <param name="predicate">The predicate to filter articles.</param>
+        /// <param name="orderBy">The function to order articles.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task that represents the asynchronous operation. 
+        /// The task result contains the result models with the article 
+        /// responses.</returns>
+        Task<ResultModels<ArticleResponse>> GetPagedAsync(
             int pageNumber, int pageSize,
             Expression<Func<ArticleRequest, bool>>? predicate = default,
-            Func<IQueryable<ArticleRequest>, IOrderedQueryable<ArticleRequest>>? orderBy = default,
+            Func<IQueryable<ArticleRequest>, 
+                IOrderedQueryable<ArticleRequest>>? orderBy = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Updates an existing article asynchronously.
+        /// Updates an article asynchronously.
         /// </summary>
         /// <param name="article">The article request model.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the updated article response.</returns>
-        Task<ArticleResponse> UpdateAsync(ArticleRequest article,
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task that represents the asynchronous operation. 
+        /// The task result contains the result model with the updated 
+        /// article response.</returns>
+        Task<ResultModel<ArticleResponse>> UpdateAsync(
+            ArticleRequest article,
             CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Deletes an article by its identifier asynchronously.
         /// </summary>
-        /// <param name="id">The identifier of the article.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        Task DeleteAsync(int id,
+        /// <param name="id">The article identifier.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task that represents the asynchronous operation. 
+        /// The task result contains the result model with the deletion 
+        /// result.</returns>
+        Task<ResultModel<ArticleResponse>> DeleteAsync(
+            int id,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Deletes an article asynchronously.
+        /// Removes an article asynchronously.
         /// </summary>
         /// <param name="article">The article request model.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation.</returns>
-        Task RemoveAsync(ArticleRequest article,
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task that represents the asynchronous operation. 
+        /// The task result contains the result model with the removal
+        /// result.</returns>
+        Task<ResultModel<ArticleResponse>> RemoveAsync(
+            ArticleRequest article,
             CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Checks if an article exists by its identifier asynchronously.
         /// </summary>
-        /// <param name="id">The identifier of the article.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a boolean value indicating whether the article exists.</returns>
-        Task<bool> ExistsAsync(int id,
+        /// <param name="id">The article identifier.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task that represents the asynchronous operation. 
+        /// The task result contains a boolean value indicating whether
+        /// the article exists.</returns>
+        Task<bool> ExistsAsync(
+            int id,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Checks if any articles match the specified criteria asynchronously.
+        /// Checks if any articles match the specified predicate asynchronously.
         /// </summary>
-        /// <param name="predicate">An expression to filter the articles.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a boolean value indicating whether any articles match the criteria.</returns>
+        /// <param name="predicate">The predicate to filter articles.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task that represents the asynchronous operation. 
+        /// The task result contains a boolean value indicating whether 
+        /// any articles match the predicate.</returns>
         Task<bool> AnyAsync(
             Expression<Func<ArticleRequest, bool>>? predicate = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets the first article that matches the specified criteria asynchronously.
+        /// Gets the first article that matches the specified predicate asynchronously.
         /// </summary>
-        /// <param name="predicate">An expression to filter the articles.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task that represents the asynchronous operation. 
-        /// The task result contains the first article response that matches the criteria or null if no article matches.</returns>
-        Task<ArticleResponse?> FirstOrDefault(Expression<Func<ArticleRequest, bool>>? 
-            predicate = default,
+        /// <param name="predicate">The predicate to filter articles.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task that represents the asynchronous operation.
+        /// The task result contains the result model with the first 
+        /// matching article response.</returns>
+        Task<ResultModel<ArticleResponse>> FirstOrDefault(
+            Expression<Func<ArticleRequest, bool>>? predicate = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets a collection of categories based on the given specification.
+        /// Gets a list of articles based on the specified specification asynchronously.
         /// </summary>
-        /// <param name="specification">The specification to filter and include related data.</param>
-        /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task representing the asynchronous operation that returns a collection of categories responses.</returns>
-        Task<IEnumerable<ArticleResponse>> GetListAsync(
+        /// <param name="specification">The specification to filter articles.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task that represents the asynchronous operation.
+        /// The task result contains the result models with the article responses.</returns>
+        Task<ResultModels<ArticleResponse>> GetListAsync(
             ISpecification<Article> specification,
             CancellationToken cancellationToken = default);
-
     }
 }

@@ -1,15 +1,19 @@
 ﻿using System.Linq.Expressions;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using home_wiki_backend.BL.Common.Contracts.Services;
 using home_wiki_backend.BL.Common.Models.Requests;
 using home_wiki_backend.DAL.Common.Contracts;
 using home_wiki_backend.DAL.Common.Models.Entities;
-using home_wiki_backend.DAL.Exceptions;
 using home_wiki_backend.Shared.Models;
+using home_wiki_backend.Shared.Models.Results.Generic;
+using home_wiki_backend.Shared.Enums;
 using home_wiki_backend.Shared.Helpers;
+using home_wiki_backend.Shared.Models.Results.Errors;
 
 namespace home_wiki_backend.BL.Services
 {
+    /// <inheritdoc/>
     public sealed class ArticleService : IArticleService
     {
         private readonly IGenericRepository<Article> _articleRepo;
@@ -23,46 +27,59 @@ namespace home_wiki_backend.BL.Services
             _logger = logger;
         }
 
-        public async Task<ArticleResponse> CreateAsync(
-            ArticleRequest articleRequest,
+        /// <inheritdoc/>
+        public async Task<ResultModel<ArticleResponse>> CreateAsync(
+            ArticleRequest article,
             CancellationToken cancellationToken = default)
         {
             try
             {
                 _logger.LogInformation("Creating article: {Name}",
-                    articleRequest.Name);
-                var article = new Article
+                    article.Name);
+                var newArticle = new Article
                 {
-                    Name = articleRequest.Name,
-                    Description = articleRequest.Description,
-                    CategoryId = articleRequest.CategoryId,
-                    CreatedBy = articleRequest.CreatedBy,
+                    Name = article.Name,
+                    Description = article.Description,
+                    CategoryId = article.CategoryId,
+                    CreatedBy = article.CreatedBy,
                     CreatedAt = DateTime.UtcNow
                 };
-                var created = await _articleRepo.AddAsync(article,
+                var created = await _articleRepo.AddAsync(newArticle,
                     cancellationToken);
                 _logger.LogInformation("Article created with ID: {Id}",
                     created.Id);
-                return new ArticleResponse
+                return new ResultModel<ArticleResponse>
                 {
-                    Id = created.Id,
-                    Name = created.Name,
-                    Description = created.Description,
-                    Category = created.Category,
-                    CreatedBy = created.CreatedBy,
-                    CreatedAt = created.CreatedAt
+                    Success = true,
+                    Message = "Article created successfully",
+                    Code = StatusCodes.Status201Created,
+                    Data = new ArticleResponse
+                    {
+                        Id = created.Id,
+                        Name = created.Name,
+                        Description = created.Description,
+                        Category = created.Category,
+                        CreatedBy = created.CreatedBy,
+                        CreatedAt = created.CreatedAt
+                    }
                 };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error creating article: {Name}",
-                    articleRequest.Name);
-                throw new ArticleServiceException(
-                    "Error creating article", ex);
+                    article.Name);
+                return new ResultModel<ArticleResponse>
+                {
+                    Success = false,
+                    Message = "Error creating article",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message, ErrorCode.Unexpected)
+                };
             }
         }
 
-        public async Task<ArticleResponse> GetByIdAsync(
+        /// <inheritdoc/>
+        public async Task<ResultModel<ArticleResponse>> GetByIdAsync(
             int id,
             CancellationToken cancellationToken = default)
         {
@@ -74,52 +91,69 @@ namespace home_wiki_backend.BL.Services
                 if (article == null)
                 {
                     _logger.LogWarning("Article with ID {Id} not found.", id);
-                    throw new KeyNotFoundException(
-                        $"Article with ID {id} not found.");
-                }
-                return new ArticleResponse
-                {
-                    Id = article.Id,
-                    Name = article.Name,
-                    Description = article.Description,
-                    Category = new CategoryResponse
+                    return new ResultModel<ArticleResponse>
                     {
-                        Name = article.Category.Name,
-                        CreatedAt = article.Category.CreatedAt,
-                        CreatedBy = article.Category.CreatedBy,
-                        ModifiedAt = article.Category.ModifiedAt,
-                        ModifiedBy = article.Category.ModifiedBy,
-                    },
-                    CreatedBy = article.CreatedBy,
-                    CreatedAt = article.CreatedAt,
-                    ModifiedBy = article.ModifiedBy,
-                    ModifiedAt = article.ModifiedAt
+                        Success = false,
+                        Message = $"Article with ID {id} not found.",
+                        Code = StatusCodes.Status404NotFound,
+                        Error = new ErrorResultModel("Not found",
+                                                       ErrorCode.Unexpected)
+                    };
+                }
+                return new ResultModel<ArticleResponse>
+                {
+                    Success = true,
+                    Message = "Article retrieved successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = new ArticleResponse
+                    {
+                        Id = article.Id,
+                        Name = article.Name,
+                        Description = article.Description,
+                        Category = new CategoryResponse
+                        {
+                            Name = article.Category.Name,
+                            CreatedAt = article.Category.CreatedAt,
+                            CreatedBy = article.Category.CreatedBy,
+                            ModifiedAt = article.Category.ModifiedAt,
+                            ModifiedBy = article.Category.ModifiedBy
+                        },
+                        CreatedBy = article.CreatedBy,
+                        CreatedAt = article.CreatedAt,
+                        ModifiedBy = article.ModifiedBy,
+                        ModifiedAt = article.ModifiedAt
+                    }
                 };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting article by ID: {Id}", id);
-                throw new ArticleServiceException(
-                    "Error retrieving article by ID", ex);
+                _logger.LogError(ex, "Error retrieving article by ID: {Id}", id);
+                return new ResultModel<ArticleResponse>
+                {
+                    Success = false,
+                    Message = "Error retrieving article by ID",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message, ErrorCode.Unexpected)
+                };
             }
         }
 
-        public async Task<IEnumerable<ArticleResponse>> GetAsync(
+        /// <inheritdoc/>
+        public async Task<ResultModels<ArticleResponse>> GetAsync(
             Expression<Func<ArticleRequest, bool>>? predicate = null,
-            Func<IQueryable<ArticleRequest>,
-                IOrderedQueryable<ArticleRequest>>? orderBy = null,
+            Func<IQueryable<ArticleRequest>, IOrderedQueryable<ArticleRequest>>?
+                orderBy = null,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation(
-                    "Retrieving list of articles with filtering/sorting.");
+                _logger.LogInformation("Retrieving articles with filters.");
                 var artPred = predicate?.ConvertTo<ArticleRequest, Article>();
                 var articles = await _articleRepo.GetAsync(
                     artPred,
                     orderBy?.ConvertTo<ArticleRequest, Article>(),
                     cancellationToken);
-                return articles.Select(a => new ArticleResponse
+                var data = articles.Select(a => new ArticleResponse
                 {
                     Id = a.Id,
                     Name = a.Name,
@@ -129,30 +163,41 @@ namespace home_wiki_backend.BL.Services
                     CreatedAt = a.CreatedAt,
                     ModifiedBy = a.ModifiedBy,
                     ModifiedAt = a.ModifiedAt
-                });
+                }).ToList();
+                return new ResultModels<ArticleResponse>
+                {
+                    Success = true,
+                    Message = "Articles retrieved successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = data
+                };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,
-                    "Error retrieving list of articles.");
-                throw new ArticleServiceException(
-                    "Error retrieving articles", ex);
+                _logger.LogError(ex, "Error retrieving articles.");
+                return new ResultModels<ArticleResponse>
+                {
+                    Success = false,
+                    Message = "Error retrieving articles",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message, ErrorCode.Unexpected)
+                };
             }
         }
 
-        public async Task<PagedList<ArticleResponse>> GetPagedAsync(
+        /// <inheritdoc/>
+        public async Task<ResultModels<ArticleResponse>> GetPagedAsync(
             int pageNumber,
             int pageSize,
             Expression<Func<ArticleRequest, bool>>? predicate = null,
-            Func<IQueryable<ArticleRequest>,
-                IOrderedQueryable<ArticleRequest>>? orderBy = null,
+            Func<IQueryable<ArticleRequest>, IOrderedQueryable<ArticleRequest>>?
+                orderBy = null,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation(
-                    "Fetching paged articles. Page: {PageNumber}, Size: {PageSize}",
-                    pageNumber, pageSize);
+                _logger.LogInformation("Fetching paged articles. " +
+                    "Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
                 var artPred = predicate?.ConvertTo<ArticleRequest, Article>();
                 var paged = await _articleRepo.GetPagedAsync(
                     pageNumber,
@@ -160,7 +205,7 @@ namespace home_wiki_backend.BL.Services
                     artPred,
                     orderBy?.ConvertTo<ArticleRequest, Article>(),
                     cancellationToken);
-                var responses = paged?.Items?.Select(a => new ArticleResponse
+                var data = paged.Items.Select(a => new ArticleResponse
                 {
                     Id = a.Id,
                     Name = a.Name,
@@ -171,205 +216,257 @@ namespace home_wiki_backend.BL.Services
                         CreatedAt = a.Category.CreatedAt,
                         CreatedBy = a.Category.CreatedBy,
                         ModifiedAt = a.Category.ModifiedAt,
-                        ModifiedBy = a.Category.ModifiedBy,
+                        ModifiedBy = a.Category.ModifiedBy
                     },
                     CreatedBy = a.CreatedBy,
                     CreatedAt = a.CreatedAt,
                     ModifiedBy = a.ModifiedBy,
                     ModifiedAt = a.ModifiedAt
-                }) ?? Array.Empty<ArticleResponse>();
-                return new PagedList<ArticleResponse>
+                }).ToList();
+                return new ResultModels<ArticleResponse>
                 {
-                    PageNumber = paged!.PageNumber,
-                    PageSize = paged.PageSize,
-                    PageCount = paged.PageCount,
-                    HasNextPage = paged.HasNextPage,
-                    HasPreviousPage = paged.HasPreviousPage,
-                    Items = responses,
-                    TotalItemCount = paged.TotalItemCount
+                    Success = true,
+                    Message = "Paged articles retrieved successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = data
                 };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error fetching paged articles.");
-                throw new ArticleServiceException(
-                    "Error retrieving paged articles", ex);
+                _logger.LogError(ex, "Error retrieving paged articles.");
+                return new ResultModels<ArticleResponse>
+                {
+                    Success = false,
+                    Message = "Error retrieving paged articles",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message, ErrorCode.Unexpected)
+                };
             }
         }
 
-        public async Task<ArticleResponse> UpdateAsync(
-            ArticleRequest articleRequest,
+        /// <inheritdoc/>
+        public async Task<ResultModel<ArticleResponse>> UpdateAsync(
+            ArticleRequest article,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("Updating article with ID: {Id}",
-                    articleRequest.Id);
-                var article = await _articleRepo.FirstOrDefaultAsync(
-                    a => a.Id == articleRequest.Id, cancellationToken);
-                if (article == null)
+                _logger.LogInformation("Updating article ID: {Id}", article.Id);
+                var existing = await _articleRepo.FirstOrDefaultAsync(
+                    a => a.Id == article.Id, cancellationToken);
+                if (existing == null)
                 {
-                    _logger.LogWarning("Article with ID {Id} not found for update.",
-                        articleRequest.Id);
-                    throw new KeyNotFoundException(
-                        $"Article with ID {articleRequest.Id} not found.");
+                    _logger.LogWarning("Article with ID {Id} not found.",
+                        article.Id);
+                    return new ResultModel<ArticleResponse>
+                    {
+                        Success = false,
+                        Message = $"Article with ID {article.Id} not found.",
+                        Code = StatusCodes.Status404NotFound,
+                        Error = new ErrorResultModel("Not found",
+                                                       ErrorCode.Unexpected)
+                    };
                 }
                 var updated = new Article
                 {
-                    Id = articleRequest.Id,
-                    Name = articleRequest.Name,
-                    Description = articleRequest.Description,
-                    CategoryId = articleRequest.CategoryId,
-                    Tags = articleRequest.TagIds?.Select(t => new Tag { Id = t })
+                    Id = article.Id,
+                    Name = article.Name,
+                    Description = article.Description,
+                    CategoryId = article.CategoryId,
+                    Tags = article.TagIds?.Select(t => new Tag { Id = t })
                         .ToHashSet(),
-                    CreatedBy = article.CreatedBy,
-                    CreatedAt = article.CreatedAt,
-                    ModifiedBy = articleRequest.ModifiedBy,
+                    CreatedBy = existing.CreatedBy,
+                    CreatedAt = existing.CreatedAt,
+                    ModifiedBy = article.ModifiedBy,
                     ModifiedAt = DateTime.UtcNow
                 };
                 await _articleRepo.UpdateAsync(updated, cancellationToken);
-                return new ArticleResponse
+                return new ResultModel<ArticleResponse>
                 {
-                    Id = updated.Id,
-                    Name = updated.Name,
-                    Description = updated.Description,
-                    Category = updated.Category,
-                    Tags = updated.Tags?.Cast<TagBase>()?.ToHashSet(),
-                    CreatedBy = updated.CreatedBy,
-                    CreatedAt = updated.CreatedAt,
-                    ModifiedBy = updated.ModifiedBy,
-                    ModifiedAt = updated.ModifiedAt
+                    Success = true,
+                    Message = "Article updated successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = new ArticleResponse
+                    {
+                        Id = updated.Id,
+                        Name = updated.Name,
+                        Description = updated.Description,
+                        Category = updated.Category,
+                        Tags = updated.Tags?.Cast<TagBase>()?.ToHashSet(),
+                        CreatedBy = updated.CreatedBy,
+                        CreatedAt = updated.CreatedAt,
+                        ModifiedBy = updated.ModifiedBy,
+                        ModifiedAt = updated.ModifiedAt
+                    }
                 };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error updating article with ID: {Id}",
-                    articleRequest.Id);
-                throw new ArticleServiceException(
-                    "Error updating article", ex);
+                _logger.LogError(ex, "Error updating article ID: {Id}", article.Id);
+                return new ResultModel<ArticleResponse>
+                {
+                    Success = false,
+                    Message = "Error updating article",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message, ErrorCode.Unexpected)
+                };
             }
         }
 
-        public async Task DeleteAsync(
+        /// <inheritdoc/>
+        public async Task<ResultModel<ArticleResponse>> DeleteAsync(
             int id,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("Deleting article with ID: {Id}", id);
-                await _articleRepo.RemoveAsync(a => a.Id == id,
-                    cancellationToken);
+                _logger.LogInformation("Deleting article ID: {Id}", id);
+                await _articleRepo.RemoveAsync(a => a.Id == id, cancellationToken);
+                return new ResultModel<ArticleResponse>
+                {
+                    Success = true,
+                    Message = "Article deleted successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = null
+                };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting article with ID: {Id}", id);
-                throw new ArticleServiceException(
-                    "Error deleting article", ex);
+                _logger.LogError(ex, "Error deleting article ID: {Id}", id);
+                return new ResultModel<ArticleResponse>
+                {
+                    Success = false,
+                    Message = "Error deleting article",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message, ErrorCode.Unexpected)
+                };
             }
         }
 
-        public async Task RemoveAsync(
-            ArticleRequest articleRequest,
+        /// <inheritdoc/>
+        public async Task<ResultModel<ArticleResponse>> RemoveAsync(
+            ArticleRequest article,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("Removing article with name: {Name}",
-                    articleRequest.Name);
+                _logger.LogInformation("Removing article: {Name}", article.Name);
                 await _articleRepo.RemoveAsync(
-                    a => a.Name == articleRequest.Name, cancellationToken);
+                    a => a.Name == article.Name, cancellationToken);
+                return new ResultModel<ArticleResponse>
+                {
+                    Success = true,
+                    Message = "Article removed successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = null
+                };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error removing article: {Name}",
-                    articleRequest.Name);
-                throw new ArticleServiceException(
-                    "Error removing article", ex);
+                _logger.LogError(ex, "Error removing article: {Name}", article.Name);
+                return new ResultModel<ArticleResponse>
+                {
+                    Success = false,
+                    Message = "Error removing article",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message, ErrorCode.Unexpected)
+                };
             }
         }
 
+        /// <inheritdoc/>
         public async Task<bool> ExistsAsync(
             int id,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogDebug("Checking existence of article ID: {Id}", id);
-                return await _articleRepo.AnyAsync(
-                    a => a.Id == id, cancellationToken);
+                return await _articleRepo.AnyAsync(a => a.Id == id, cancellationToken);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error checking existence of article ID: {Id}",
-                    id);
-                throw new ArticleServiceException(
-                    "Error checking article existence", ex);
+                _logger.LogError(ex, "Error checking article existence for ID: {Id}", id);
+                return false;
             }
         }
 
+        /// <inheritdoc/>
         public async Task<bool> AnyAsync(
             Expression<Func<ArticleRequest, bool>>? predicate = null,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogDebug("Checking any article match.");
                 var artPred = predicate?.ConvertTo<ArticleRequest, Article>();
                 return await _articleRepo.AnyAsync(artPred, cancellationToken);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in AnyAsync for articles.");
-                throw new ArticleServiceException(
-                    "Error in AnyAsync for articles", ex);
+                return false;
             }
         }
 
-        public async Task<ArticleResponse?> FirstOrDefault(
+        /// <inheritdoc/>
+        public async Task<ResultModel<ArticleResponse>> FirstOrDefault(
             Expression<Func<ArticleRequest, bool>>? predicate = null,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("Fetching first matching article.");
                 var artPred = predicate?.ConvertTo<ArticleRequest, Article>();
-                var article = await _articleRepo.FirstOrDefaultAsync(artPred,
-                    cancellationToken);
+                var article = await _articleRepo.FirstOrDefaultAsync(artPred, cancellationToken);
                 if (article == null)
                 {
-                    _logger.LogWarning("No article found matching criteria.");
-                    return null;
+                    return new ResultModel<ArticleResponse>
+                    {
+                        Success = false,
+                        Message = "No matching article found",
+                        Code = StatusCodes.Status404NotFound,
+                        Error = new ErrorResultModel("Not found", ErrorCode.Unexpected)
+                    };
                 }
-                return new ArticleResponse
+                return new ResultModel<ArticleResponse>
                 {
-                    Id = article.Id,
-                    Name = article.Name,
-                    Description = article.Description,
-                    Category = article.Category,
-                    CreatedBy = article.CreatedBy,
-                    CreatedAt = article.CreatedAt,
-                    ModifiedBy = article.ModifiedBy,
-                    ModifiedAt = article.ModifiedAt
+                    Success = true,
+                    Message = "Article retrieved successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = new ArticleResponse
+                    {
+                        Id = article.Id,
+                        Name = article.Name,
+                        Description = article.Description,
+                        Category = article.Category,
+                        CreatedBy = article.CreatedBy,
+                        CreatedAt = article.CreatedAt,
+                        ModifiedBy = article.ModifiedBy,
+                        ModifiedAt = article.ModifiedAt
+                    }
                 };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in FirstOrDefault for articles.");
-                throw new ArticleServiceException(
-                    "Error fetching first matching article", ex);
+                return new ResultModel<ArticleResponse>
+                {
+                    Success = false,
+                    Message = "Error retrieving first article",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message, ErrorCode.Unexpected)
+                };
             }
         }
 
-        public async Task<IEnumerable<ArticleResponse>> GetListAsync(
+        /// <inheritdoc/>
+        public async Task<ResultModels<ArticleResponse>> GetListAsync(
             ISpecification<Article> specification,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                _logger.LogInformation("Retrieving articles via spec.");
-                var articles = await _articleRepo.ListAsync(specification,
-                    cancellationToken);
-                return articles.Select(a => new ArticleResponse
+                _logger.LogInformation("Retrieving articles via specification.");
+                var articles = await _articleRepo.ListAsync(specification, cancellationToken);
+                var data = articles.Select(a => new ArticleResponse
                 {
                     Id = a.Id,
                     Name = a.Name,
@@ -380,13 +477,25 @@ namespace home_wiki_backend.BL.Services
                     CreatedAt = a.CreatedAt,
                     ModifiedBy = a.ModifiedBy,
                     ModifiedAt = a.ModifiedAt
-                });
+                }).ToList();
+                return new ResultModels<ArticleResponse>
+                {
+                    Success = true,
+                    Message = "Articles retrieved via specification",
+                    Code = StatusCodes.Status200OK,
+                    Data = data
+                };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving articles via spec.");
-                throw new ArticleServiceException(
-                    "Error retrieving articles by specification", ex);
+                _logger.LogError(ex, "Error retrieving articles via specification.");
+                return new ResultModels<ArticleResponse>
+                {
+                    Success = false,
+                    Message = "Error retrieving articles by specification",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message, ErrorCode.Unexpected)
+                };
             }
         }
     }
