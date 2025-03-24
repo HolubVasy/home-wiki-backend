@@ -158,12 +158,15 @@ namespace home_wiki_backend.BL.Services
             };
         }
 
-        public async Task<PagedList<ArticleResponse>> GetPagedAsync(int pageNumber, int pageSize,
+        public async Task<PagedList<ArticleResponse>> GetPagedAsync(int pageNumber, 
+            int pageSize,
             Expression<Func<ArticleRequest, bool>>? predicate = null,
             Func<IQueryable<ArticleRequest>, IOrderedQueryable<ArticleRequest>>? orderBy = null,
             CancellationToken cancellationToken = default)
         {
-            _logger.LogInformation("Fetching paged articles. Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
+            _logger.LogInformation("Fetching paged articles. Page: {PageNumber}," +
+                " Size: {PageSize}", 
+                pageNumber, pageSize);
 
             var articlePredicate = predicate?.ConvertTo<ArticleRequest, Article>();
             var pagedArticles = await _articleRepository.GetPagedAsync(
@@ -208,7 +211,8 @@ namespace home_wiki_backend.BL.Services
         {
             _logger.LogInformation("Updating article with ID: {Id}", articleRequest.Id);
 
-            var article = await _articleRepository.FirstOrDefaultAsync(a => a.Id == articleRequest.Id, cancellationToken);
+            var article = await _articleRepository.FirstOrDefaultAsync(a => a.Id == 
+            articleRequest.Id, cancellationToken);
             if (article == null)
             {
                 _logger.LogWarning("Article with ID {Id} not found for update.", articleRequest.Id);
@@ -284,7 +288,8 @@ namespace home_wiki_backend.BL.Services
         }
 
         public static Func<IQueryable<TDestination>, IOrderedQueryable<TDestination>>? 
-            ConvertTo<TSource, TDestination>(this Func<IQueryable<TSource>, IOrderedQueryable<TSource>>? source)
+            ConvertTo<TSource, TDestination>(this Func<IQueryable<TSource>, 
+                IOrderedQueryable<TSource>>? source)
         {
             if (source == null) return null;
 

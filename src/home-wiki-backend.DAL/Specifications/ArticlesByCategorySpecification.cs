@@ -3,7 +3,7 @@
 /// <summary>
 /// Specification for retrieving articles by category.
 /// </summary>
-public class ArticlesByCategorySpecification :
+public sealed class ArticlesByCategorySpecification :
     SpecificationBase<Article>
 {
     /// <summary>

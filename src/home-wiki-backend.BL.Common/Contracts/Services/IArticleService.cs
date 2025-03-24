@@ -113,11 +113,11 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Gets a collection of articles based on the given specification.
+        /// Gets a collection of categories based on the given specification.
         /// </summary>
         /// <param name="specification">The specification to filter and include related data.</param>
         /// <param name="cancellationToken">A token to cancel the operation.</param>
-        /// <returns>A task representing the asynchronous operation that returns a collection of article responses.</returns>
+        /// <returns>A task representing the asynchronous operation that returns a collection of categories responses.</returns>
         Task<IEnumerable<ArticleResponse>> GetListAsync(
             ISpecification<Article> specification,
             CancellationToken cancellationToken = default);

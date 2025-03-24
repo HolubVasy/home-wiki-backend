@@ -1,4 +1,5 @@
 ﻿using home_wiki_backend.BL.Common.Models.Requests;
+using home_wiki_backend.DAL.Common.Models.Entities;
 using System.Linq.Expressions;
 
 namespace home_wiki_backend.BL.Common.Contracts.Services
@@ -109,6 +110,16 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         Task<TagResponse?> FirstOrDefault(Expression<Func<TagRequest, bool>>? 
             predicate = default,
             CancellationToken cancellationToken = default);
-            
+
+        /// <summary>
+        /// Gets a collection of tags based on the given specification.
+        /// </summary>
+        /// <param name="specification">The specification to filter and include related data.</param>
+        /// <param name="cancellationToken">A token to cancel the operation.</param>
+        /// <returns>A task representing the asynchronous operation that returns a collection of tags responses.</returns>
+        Task<IEnumerable<TagResponse>> GetListAsync(
+            ISpecification<Tag> specification,
+            CancellationToken cancellationToken = default);
+
     }
 }
