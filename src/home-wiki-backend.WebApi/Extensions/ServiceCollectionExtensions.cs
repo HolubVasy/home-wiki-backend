@@ -26,6 +26,8 @@ namespace home_wiki_backend.Extensions
             services.AddScoped<ISeeder, InitialSeeder>();
 
             services.AddScoped<IArticleService, ArticleService>();
+            services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<ITagService, TagService>();
         }
     }
 }

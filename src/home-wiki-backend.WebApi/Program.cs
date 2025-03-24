@@ -1,3 +1,4 @@
+using Andersen.Infrastructure.API;
 using home_wiki_backend.DAL.Data;
 using home_wiki_backend.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -87,6 +88,8 @@ namespace home_wiki_backend
                 }
 
                 app.UseHttpsRedirection();
+
+                app.UseMiddleware<ExceptionMiddleware>();
 
                 app.UseAuthorization();
 
