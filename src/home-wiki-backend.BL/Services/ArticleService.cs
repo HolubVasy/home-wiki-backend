@@ -139,6 +139,67 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
+        public async Task<ResultModel<ArticleResponse>> GetByIdAsync(
+            int id,
+            ISpecification<Article> specification,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                _logger.LogInformation("Getting article by ID: {Id}", id);
+                var article = await _articleRepo.FirstOrDefaultAsync(specification, 
+                    cancellationToken);
+                if (article == null)
+                {
+                    _logger.LogWarning("Article with ID {Id} not found.", id);
+                    return new ResultModel<ArticleResponse>
+                    {
+                        Success = false,
+                        Message = $"Article with ID {id} not found.",
+                        Code = StatusCodes.Status404NotFound,
+                        Error = new ErrorResultModel("Not found",
+                                                       ErrorCode.Unexpected)
+                    };
+                }
+                return new ResultModel<ArticleResponse>
+                {
+                    Success = true,
+                    Message = "Article retrieved successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = new ArticleResponse
+                    {
+                        Id = article.Id,
+                        Name = article.Name,
+                        Description = article.Description,
+                        Category = new CategoryResponse
+                        {
+                            Name = article.Category.Name,
+                            CreatedAt = article.Category.CreatedAt,
+                            CreatedBy = article.Category.CreatedBy,
+                            ModifiedAt = article.Category.ModifiedAt,
+                            ModifiedBy = article.Category.ModifiedBy
+                        },
+                        CreatedBy = article.CreatedBy,
+                        CreatedAt = article.CreatedAt,
+                        ModifiedBy = article.ModifiedBy,
+                        ModifiedAt = article.ModifiedAt
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving article by ID: {Id}", id);
+                return new ResultModel<ArticleResponse>
+                {
+                    Success = false,
+                    Message = "Error retrieving article by ID",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message, ErrorCode.Unexpected)
+                };
+            }
+        }
+
+        /// <inheritdoc/>
         public async Task<ResultModels<ArticleResponse>> GetAsync(
             Expression<Func<ArticleRequest, bool>>? predicate = null,
             Func<IQueryable<ArticleRequest>, IOrderedQueryable<ArticleRequest>>?

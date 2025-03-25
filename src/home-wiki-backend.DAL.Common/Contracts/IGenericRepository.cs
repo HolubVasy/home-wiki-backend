@@ -185,5 +185,18 @@ namespace home_wiki_backend.DAL.Common.Contracts
             int pageSize,
             ISpecification<TEntity> specification,
             CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Asynchronously gets the first entity that satisfies the specified specification
+        /// or null if no such entity is found.
+        /// </summary>
+        /// <param name="specification">The specification to filter the entities.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used to
+        /// cancel the work.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result
+        /// contains the first entity or null.</returns>
+        Task<TEntity?> FirstOrDefaultAsync(
+            ISpecification<TEntity> specification,
+            CancellationToken cancellationToken = default);
     }
 }

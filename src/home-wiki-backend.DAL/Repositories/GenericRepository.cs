@@ -79,6 +79,29 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
     }
 
     /// <inheritdoc/>
+    public async Task<TEntity?> FirstOrDefaultAsync(
+        ISpecification<TEntity> specification,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await using var newContext = new DbWikiContext(_context.Options);
+            var newDbSet = newContext.Set<TEntity>();
+            var query = GetQuery(newDbSet, specification);
+
+            return await query
+                .FirstOrDefaultAsync(cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            throw new GenericRepositoryException(
+                $"An error occurred while retrieving the first entity of type `{typeof(TEntity).Name}`.",
+                ex);
+        }
+    }
+
+    /// <inheritdoc/>
     public async Task<TEntity?> FirstOrDefaultWithNewContextAsync(Expression<Func<TEntity, bool>> predicate,
         CancellationToken cancellationToken = default)
     {
@@ -341,7 +364,7 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
         {
             await using var newContext = new DbWikiContext(_context.Options);
             var newDbSet = newContext.Set<TEntity>();
-            var query = SpecificationEvaluator<TEntity>.GetQuery(_dbSet.AsNoTracking(), specification);
+            var query = GetQuery(newDbSet, specification);
 
             var totalItemCountTask = query.CountAsync(cancellationToken);
             var elementsTask = query
@@ -404,7 +427,7 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
     {
         try
         {
-            var query = SpecificationEvaluator<TEntity>.GetQuery(_dbSet.AsNoTracking(), specification);
+            var query = GetQuery(_dbSet, specification);
             return await query.ToListAsync(cancellationToken)
                 .ConfigureAwait(false);
         }
@@ -435,5 +458,10 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
                 $"An error occurred while removing an entity of type `{typeof(TEntity).Name}`.",
                 ex);
         }
+    }
+
+    private IQueryable<TEntity> GetQuery(DbSet<TEntity> _dbSet, ISpecification<TEntity> specification)
+    {
+        return SpecificationEvaluator<TEntity>.GetQuery(_dbSet.AsNoTracking(), specification);
     }
 }
