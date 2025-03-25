@@ -71,7 +71,7 @@ namespace home_wiki_backend.Controllers
         public async Task<ActionResult<IList<ArticleResponse>>> GetAll()
         {
             // Here we call GetAsync without a predicate.
-            var result = await _articleService.GetAsync();
+            var result = await _articleService.GetListAsync(new ArticlesWithCategoryAndTagsSpecification());
             if (result.Success)
             {
                 return Ok(result.Data);
