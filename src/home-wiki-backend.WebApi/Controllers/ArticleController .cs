@@ -74,7 +74,7 @@ namespace home_wiki_backend.Controllers
             var result = await _articleService.GetAsync();
             if (result.Success)
             {
-                return Ok(result);
+                return Ok(result.Data);
             }
             return StatusCode(result.Code, result.Data);
         }

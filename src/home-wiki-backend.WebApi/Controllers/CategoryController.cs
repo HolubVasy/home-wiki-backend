@@ -35,7 +35,7 @@ namespace home_wiki_backend.Controllers
             var result = await _categoryService.CreateAsync(category);
             if (result.Success)
             {
-                return CreatedAtAction(nameof(GetById), new { id = result.Data?.Id }, result);
+                return CreatedAtAction(nameof(GetById), new { id = result.Data?.Id }, result.Data);
             }
             return StatusCode(result.Code, result.Data);
         }
