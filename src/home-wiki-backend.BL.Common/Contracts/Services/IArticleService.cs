@@ -1,5 +1,6 @@
 ﻿using home_wiki_backend.BL.Common.Models.Requests;
 using home_wiki_backend.DAL.Common.Models.Entities;
+using home_wiki_backend.Shared.Models;
 using home_wiki_backend.Shared.Models.Results.Generic;
 using System.Linq.Expressions;
 
@@ -62,7 +63,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <returns>A task that represents the asynchronous operation. 
         /// The task result contains the result models with the article 
         /// responses.</returns>
-        Task<ResultModels<ArticleResponse>> GetPagedAsync(
+        Task<ResultModel<PagedList<ArticleResponse>>> GetPagedAsync(
             int pageNumber, int pageSize,
             Expression<Func<ArticleRequest, bool>>? predicate = default,
             Func<IQueryable<ArticleRequest>,
@@ -149,6 +150,20 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <returns>A task that represents the asynchronous operation.
         /// The task result contains the result models with the article responses.</returns>
         Task<ResultModels<ArticleResponse>> GetListAsync(
+            ISpecification<Article> specification,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Gets paged articles based on the specified specification asynchronously.
+        /// </summary>
+        /// <param name="pageNumber">The page number.</param>
+        /// <param name="pageSize">The page size.</param>
+        /// <param name="specification">The specification to filter articles.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A task that represents the asynchronous operation.
+        /// The task result contains the result models with the article responses.</returns>
+        Task<ResultModel<PagedList<ArticleResponse>>> GetPagedAsync(
+            int pageNumber, int pageSize,
             ISpecification<Article> specification,
             CancellationToken cancellationToken = default);
     }

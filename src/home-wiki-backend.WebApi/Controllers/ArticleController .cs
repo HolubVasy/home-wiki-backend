@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using home_wiki_backend.BL.Common.Contracts.Services;
 using home_wiki_backend.BL.Common.Models.Requests;
+using home_wiki_backend.Shared.Models;
 
 namespace home_wiki_backend.Controllers
 {
@@ -125,6 +126,28 @@ namespace home_wiki_backend.Controllers
         public async Task<ActionResult<ArticleResponse>> Remove([FromBody] ArticleRequest article)
         {
             var result = await _articleService.RemoveAsync(article);
+            if (result.Success)
+            {
+                return Ok(result.Data);
+            }
+            return StatusCode(result.Code, result.Data);
+        }
+
+        /// <summary>
+        /// Retrieves paged articles.
+        /// </summary>
+        /// <param name="pageNumber">The page number (default is 1).</param>
+        /// <param name="pageSize">The page size (default is 10).</param>
+        /// <returns>A result model containing a paged list of article responses.</returns>
+        [HttpGet("paged")]
+        [ProducesResponseType(typeof(PagedList<ArticleResponse>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PagedList<ArticleResponse>), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<PagedList<ArticleResponse>>> GetPaged(
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
+        {
+            var result = await _articleService.GetPagedAsync(pageNumber, pageSize,
+                new ArticlesWithCategoryAndTagsSpecification());
             if (result.Success)
             {
                 return Ok(result.Data);

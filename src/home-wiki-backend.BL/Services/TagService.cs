@@ -9,6 +9,7 @@ using home_wiki_backend.Shared.Models.Results.Generic;
 using home_wiki_backend.Shared.Enums;
 using home_wiki_backend.Shared.Helpers;
 using home_wiki_backend.Shared.Models.Results.Errors;
+using home_wiki_backend.Shared.Models;
 
 namespace home_wiki_backend.BL.Services
 {
@@ -173,7 +174,7 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModels<TagResponse>> GetPagedAsync(
+        public async Task<ResultModel<PagedList<TagResponse>>> GetPagedAsync(
             int pageNumber,
             int pageSize,
             Expression<Func<TagRequest, bool>>? predicate = null,
@@ -199,18 +200,27 @@ namespace home_wiki_backend.BL.Services
                     ModifiedBy = t.ModifiedBy,
                     ModifiedAt = t.ModifiedAt
                 }).ToList();
-                return new ResultModels<TagResponse>
+                return new ResultModel<PagedList<TagResponse>>
                 {
                     Success = true,
                     Message = "Paged tags retrieved successfully",
                     Code = StatusCodes.Status200OK,
-                    Data = data
+                    Data = new PagedList<TagResponse>()
+                    {
+                        PageNumber = pageNumber,
+                        PageSize = pageSize,
+                        PageCount = paged.PageCount,
+                        HasNextPage = paged.HasNextPage,
+                        HasPreviousPage = paged.HasPreviousPage,
+                        TotalItemCount = paged.TotalItemCount,
+                        Items = data,
+                    }
                 };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving paged tags.");
-                return new ResultModels<TagResponse>
+                return new ResultModel<PagedList<TagResponse>>
                 {
                     Success = false,
                     Message = "Error retrieving paged tags",

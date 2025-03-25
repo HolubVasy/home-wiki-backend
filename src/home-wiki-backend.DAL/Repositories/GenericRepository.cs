@@ -331,6 +331,49 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
         }
     }
 
+    /// <inheritdoc/>
+    public async Task<PagedList<TEntity>> GetPagedAsync(
+        int pageNumber, int pageSize,
+        ISpecification<TEntity> specification,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await using var newContext = new DbWikiContext(_context.Options);
+            var newDbSet = newContext.Set<TEntity>();
+            var query = SpecificationEvaluator<TEntity>.GetQuery(_dbSet.AsNoTracking(), specification);
+
+            var totalItemCountTask = query.CountAsync(cancellationToken);
+            var elementsTask = query
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync(cancellationToken);
+
+            await Task.WhenAll(totalItemCountTask, elementsTask)
+                .ConfigureAwait(false);
+
+            var totalItemCount = await totalItemCountTask;
+            var elements = await elementsTask;
+
+            return new PagedList<TEntity>
+            {
+                PageCount = (int)Math.Ceiling(totalItemCount / (double)pageSize),
+                TotalItemCount = totalItemCount,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                HasPreviousPage = pageNumber > 1,
+                HasNextPage = pageNumber < (int)Math.Ceiling(totalItemCount / (double)pageSize),
+                Items = elements is null ? Array.Empty<TEntity>() : elements.AsReadOnly()
+            };
+        }
+        catch (Exception ex)
+        {
+            throw new GenericRepositoryException(
+                $"An error occurred while retrieving paginated entities of type `{typeof(TEntity).Name}`.",
+                ex);
+        }
+    }
+
     private static string GetPropertyName<T>(Expression<Func<T, object>> expression)
     {
         return expression.Body switch

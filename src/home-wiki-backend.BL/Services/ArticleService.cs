@@ -186,7 +186,7 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModels<ArticleResponse>> GetPagedAsync(
+        public async Task<ResultModel<PagedList<ArticleResponse>>> GetPagedAsync(
             int pageNumber,
             int pageSize,
             Expression<Func<ArticleRequest, bool>>? predicate = null,
@@ -205,42 +205,33 @@ namespace home_wiki_backend.BL.Services
                     artPred,
                     orderBy?.ConvertTo<ArticleRequest, Article>(),
                     cancellationToken);
-                var data = paged.Items.Select(a => new ArticleResponse
-                {
-                    Id = a.Id,
-                    Name = a.Name,
-                    Description = a.Description,
-                    Category = new CategoryResponse
-                    {
-                        Name = a.Category.Name,
-                        CreatedAt = a.Category.CreatedAt,
-                        CreatedBy = a.Category.CreatedBy,
-                        ModifiedAt = a.Category.ModifiedAt,
-                        ModifiedBy = a.Category.ModifiedBy
-                    },
-                    CreatedBy = a.CreatedBy,
-                    CreatedAt = a.CreatedAt,
-                    ModifiedBy = a.ModifiedBy,
-                    ModifiedAt = a.ModifiedAt
-                }).ToList();
-                return new ResultModels<ArticleResponse>
-                {
-                    Success = true,
-                    Message = "Paged articles retrieved successfully",
-                    Code = StatusCodes.Status200OK,
-                    Data = data
-                };
+                return GetPaged(pageNumber, pageSize, paged);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving paged articles.");
-                return new ResultModels<ArticleResponse>
-                {
-                    Success = false,
-                    Message = "Error retrieving paged articles",
-                    Code = StatusCodes.Status500InternalServerError,
-                    Error = new ErrorResultModel(ex.Message, ErrorCode.Unexpected)
-                };
+                return ReturnFailed(ex);
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<ResultModel<PagedList<ArticleResponse>>> GetPagedAsync(
+            int pageNumber,
+            int pageSize,
+            ISpecification<Article> specification,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var paged = await _articleRepo.GetPagedAsync(
+                    pageNumber,
+                    pageSize,
+                    specification,
+                    cancellationToken);
+                return GetPaged(pageNumber, pageSize, paged);
+            }
+            catch (Exception ex)
+            {
+                return ReturnFailed(ex);
             }
         }
 
@@ -512,5 +503,62 @@ namespace home_wiki_backend.BL.Services
                 };
             }
         }
+
+        private ResultModel<PagedList<ArticleResponse>> GetPaged(
+            int pageNumber,
+            int pageSize,
+            PagedList<Article> paged,
+            CancellationToken cancellationToken = default)
+        {
+            _logger.LogInformation("Fetching paged articles. " +
+                "Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
+            var data = paged.Items.Select(a => new ArticleResponse
+            {
+                Id = a.Id,
+                Name = a.Name,
+                Description = a.Description,
+                Category = new CategoryResponse
+                {
+                    Name = a.Category.Name,
+                    CreatedAt = a.Category.CreatedAt,
+                    CreatedBy = a.Category.CreatedBy,
+                    ModifiedAt = a.Category.ModifiedAt,
+                    ModifiedBy = a.Category.ModifiedBy
+                },
+                CreatedBy = a.CreatedBy,
+                CreatedAt = a.CreatedAt,
+                ModifiedBy = a.ModifiedBy,
+                ModifiedAt = a.ModifiedAt
+            }).ToList();
+            return new ResultModel<PagedList<ArticleResponse>>
+            {
+                Success = true,
+                Message = "Paged articles retrieved successfully",
+                Code = StatusCodes.Status200OK,
+                Data = new PagedList<ArticleResponse>()
+                {
+                    Items = data,
+                    PageNumber = paged.PageNumber,
+                    PageSize = paged.PageSize,
+                    TotalItemCount = paged.TotalItemCount,
+                    HasNextPage = paged.HasNextPage,
+                    HasPreviousPage = paged.HasPreviousPage,
+                    PageCount = paged.PageCount
+                }
+            };
+        }
+
+        private ResultModel<PagedList<ArticleResponse>> ReturnFailed(Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving paged articles.");
+            return new ResultModel<PagedList<ArticleResponse>>
+            {
+                Success = false,
+                Message = "Error retrieving paged articles",
+                Code = StatusCodes.Status500InternalServerError,
+                Error = new ErrorResultModel(ex.Message, ErrorCode.Unexpected)
+            };
+        }
+
     }
 }

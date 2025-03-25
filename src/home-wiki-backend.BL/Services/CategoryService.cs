@@ -9,6 +9,7 @@ using home_wiki_backend.Shared.Models.Results.Generic;
 using home_wiki_backend.Shared.Enums;
 using home_wiki_backend.Shared.Helpers;
 using home_wiki_backend.Shared.Models.Results.Errors;
+using home_wiki_backend.Shared.Models;
 
 namespace home_wiki_backend.BL.Services
 {
@@ -177,7 +178,7 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModels<CategoryResponse>>
+        public async Task<ResultModel<PagedList<CategoryResponse>>>
             GetPagedAsync(
             int pageNumber,
             int pageSize,
@@ -206,18 +207,27 @@ namespace home_wiki_backend.BL.Services
                     ModifiedBy = c.ModifiedBy,
                     ModifiedAt = c.ModifiedAt
                 }).ToList();
-                return new ResultModels<CategoryResponse>
+                return new ResultModel<PagedList<CategoryResponse>>
                 {
                     Success = true,
                     Message = "Paged categories retrieved successfully",
                     Code = StatusCodes.Status200OK,
-                    Data = data
+                    Data = new PagedList<CategoryResponse>()
+                    {
+                        PageNumber = pageNumber,
+                        PageSize = pageSize,
+                        PageCount = paged.TotalItemCount,
+                        HasPreviousPage = paged.HasPreviousPage,
+                        TotalItemCount = paged.TotalItemCount,
+                        HasNextPage = paged.HasNextPage,
+                        Items = data
+                    }
                 };
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving paged categories.");
-                return new ResultModels<CategoryResponse>
+                return new ResultModel<PagedList<CategoryResponse>>
                 {
                     Success = false,
                     Message = "Error retrieving paged categories",

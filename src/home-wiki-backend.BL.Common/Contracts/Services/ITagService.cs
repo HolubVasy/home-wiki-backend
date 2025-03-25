@@ -2,6 +2,7 @@
 using home_wiki_backend.BL.Common.Models.Requests;
 using home_wiki_backend.Shared.Models.Results.Generic;
 using home_wiki_backend.DAL.Common.Models.Entities;
+using home_wiki_backend.Shared.Models;
 
 namespace home_wiki_backend.BL.Common.Contracts.Services
 {
@@ -54,7 +55,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <param name="orderBy">The function to order tags.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The result models containing the tag responses.</returns>
-        Task<ResultModels<TagResponse>> GetPagedAsync(
+        Task<ResultModel<PagedList<TagResponse>>> GetPagedAsync(
             int pageNumber, int pageSize,
             Expression<Func<TagRequest, bool>>? predicate = default,
             Func<IQueryable<TagRequest>,

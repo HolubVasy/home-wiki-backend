@@ -130,7 +130,8 @@ namespace home_wiki_backend.DAL.Common.Contracts
         /// cancel the work.</param>
         /// <returns>A task that represents the asynchronous operation. The task result
         /// contains a collection of entities.</returns>
-        Task<IEnumerable<TEntity>> GetWithNestedIncludesAsync(Expression<Func<TEntity, bool>> predicate,
+        Task<IEnumerable<TEntity>> GetWithNestedIncludesAsync(
+            Expression<Func<TEntity, bool>> predicate,
             IEnumerable<Expression<Func<TEntity, object>>[]> navigationPropertyPaths,
             CancellationToken cancellationToken = default);
 
@@ -141,14 +142,18 @@ namespace home_wiki_backend.DAL.Common.Contracts
         IQueryable<TEntity> GetQueryable();
 
         /// <summary>
-        /// Asynchronously gets a paginated collection of entities that satisfy the specified predicate.
+        /// Asynchronously gets a paginated collection of entities
+        /// that satisfy the specified predicate.
         /// </summary>
         /// <param name="pageNumber">The page number to retrieve.</param>
         /// <param name="pageSize">The number of entities per page.</param>
-        /// <param name="predicate">A function to test each element for a condition.</param>
+        /// <param name="predicate">A function to test each element
+        /// for a condition.</param>
         /// <param name="orderBy">A function to order the entities.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used to cancel the work.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a paginated collection of entities.</returns>
+        /// <param name="cancellationToken">A cancellation token 
+        /// that can be used to cancel the work.</param>
+        /// <returns>A task that represents the asynchronous operation. 
+        /// The task result contains a paginated collection of entities.</returns>
         Task<PagedList<TEntity>> GetPagedAsync(
             int pageNumber, int pageSize,
             Expression<Func<TEntity, bool>>? predicate = default,
@@ -156,9 +161,28 @@ namespace home_wiki_backend.DAL.Common.Contracts
             CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// Asynchronously gets a list of entities that satisfy the specified specification.
+        /// Asynchronously gets a list of entities that satisfy the 
+        /// specified specification.
         /// </summary>
         Task<IReadOnlyList<TEntity>> ListAsync(
+            ISpecification<TEntity> specification,
+            CancellationToken cancellationToken = default);
+
+        /// <summary>
+        /// Asynchronously gets a paginated collection of 
+        /// entities that satisfy the specified specification.
+        /// </summary>
+        /// <param name="pageNumber">The page number to retrieve.</param>
+        /// <param name="pageSize">The number of entities per page.</param>
+        /// <param name="specification">The specification to 
+        /// filter the entities.</param>
+        /// <param name="cancellationToken">A cancellation token 
+        /// that can be used to cancel the work.</param>
+        /// <returns>A task that represents the asynchronous operation. 
+        /// The task result contains a paginated collection of entities.</returns>
+        Task<PagedList<TEntity>> GetPagedAsync(
+            int pageNumber,
+            int pageSize,
             ISpecification<TEntity> specification,
             CancellationToken cancellationToken = default);
     }

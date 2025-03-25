@@ -2,6 +2,7 @@
 using home_wiki_backend.BL.Common.Models.Requests;
 using home_wiki_backend.Shared.Models.Results.Generic;
 using home_wiki_backend.DAL.Common.Models.Entities;
+using home_wiki_backend.Shared.Models;
 
 namespace home_wiki_backend.BL.Common.Contracts.Services
 {
@@ -54,7 +55,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A result model containing the list of paged category 
         /// responses.</returns>
-        Task<ResultModels<CategoryResponse>> GetPagedAsync(
+        Task<ResultModel<PagedList<CategoryResponse>>> GetPagedAsync(
             int pageNumber, int pageSize,
             Expression<Func<CategoryRequest, bool>>? predicate = default,
             Func<IQueryable<CategoryRequest>,
