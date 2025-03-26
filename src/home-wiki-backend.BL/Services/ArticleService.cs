@@ -66,7 +66,15 @@ namespace home_wiki_backend.BL.Services
             }
             catch (Exception ex)
             {
-                return ReturnFailedGetById(id, ex);
+                _logger.LogError(ex, "Error creating article: {Name}",
+                    article.Name);
+                return new ResultModel<ArticleResponse>
+                {
+                    Success = false,
+                    Message = "Error creating article",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message, ErrorCode.Unexpected)
+                };
             }
         }
 
@@ -78,26 +86,14 @@ namespace home_wiki_backend.BL.Services
             try
             {
                 _logger.LogInformation("Getting article by ID: {Id}", id);
-                var article = await _articleRepo.FirstOrDefaultAsync(
-                    a => a.Id == id, cancellationToken);
+                var article = await _articleRepo.FirstOrDefaultAsync(id,
+                    new ArticlesWithCategoryAndTagsSpecification(), cancellationToken);
                 return GetById(id, article);
             }
             catch (Exception ex)
             {
                 return ReturnFailedGetById(id, ex);
             }
-        }
-
-        private ResultModel<ArticleResponse> ReturnFailedGetById(int id, Exception ex)
-        {
-            _logger.LogError(ex, "Error retrieving article by ID: {Id}", id);
-            return new ResultModel<ArticleResponse>
-            {
-                Success = false,
-                Message = "Error retrieving article by ID",
-                Code = StatusCodes.Status500InternalServerError,
-                Error = new ErrorResultModel(ex.Message, ErrorCode.Unexpected)
-            };
         }
 
         /// <inheritdoc/>
@@ -109,20 +105,13 @@ namespace home_wiki_backend.BL.Services
             try
             {
                 _logger.LogInformation("Getting article by ID: {Id}", id);
-                var article = await _articleRepo.FirstOrDefaultAsync(specification, 
+                var article = await _articleRepo.FirstOrDefaultAsync(id, specification, 
                     cancellationToken);
-                return GetById(id, article); 
+                return GetById(id, article);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error retrieving article by ID: {Id}", id);
-                return new ResultModel<ArticleResponse>
-                {
-                    Success = false,
-                    Message = "Error retrieving article by ID",
-                    Code = StatusCodes.Status500InternalServerError,
-                    Error = new ErrorResultModel(ex.Message, ErrorCode.Unexpected)
-                };
+                return ReturnFailedGetById(id, ex);
             }
         }
 
@@ -587,7 +576,17 @@ namespace home_wiki_backend.BL.Services
                 }
             };
         }
-        }
 
+        private ResultModel<ArticleResponse> ReturnFailedGetById(int id, Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving article by ID: {Id}", id);
+            return new ResultModel<ArticleResponse>
+            {
+                Success = false,
+                Message = "Error retrieving article by ID",
+                Code = StatusCodes.Status500InternalServerError,
+                Error = new ErrorResultModel(ex.Message, ErrorCode.Unexpected)
+            };
+        }
     }
 }
