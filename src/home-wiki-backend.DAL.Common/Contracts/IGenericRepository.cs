@@ -196,6 +196,7 @@ namespace home_wiki_backend.DAL.Common.Contracts
         /// <returns>A task that represents the asynchronous operation. The task result
         /// contains the first entity or null.</returns>
         Task<TEntity?> FirstOrDefaultAsync(
+            int id,
             ISpecification<TEntity> specification,
             CancellationToken cancellationToken = default);
     }

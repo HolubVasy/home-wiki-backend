@@ -80,6 +80,7 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
 
     /// <inheritdoc/>
     public async Task<TEntity?> FirstOrDefaultAsync(
+        int id,
         ISpecification<TEntity> specification,
         CancellationToken cancellationToken = default)
     {
@@ -90,7 +91,7 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
             var query = GetQuery(newDbSet, specification);
 
             return await query
-                .FirstOrDefaultAsync(cancellationToken)
+                .FirstOrDefaultAsync(e => e.Id == id, cancellationToken)
                 .ConfigureAwait(false);
         }
         catch (Exception ex)
