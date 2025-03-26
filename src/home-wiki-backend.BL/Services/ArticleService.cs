@@ -569,6 +569,7 @@ namespace home_wiki_backend.BL.Services
                         ModifiedAt = article.Category.ModifiedAt,
                         ModifiedBy = article.Category.ModifiedBy
                     },
+                    Tags = article.Tags?.Select(t => (TagBase)t).ToHashSet(),
                     CreatedBy = article.CreatedBy,
                     CreatedAt = article.CreatedAt,
                     ModifiedBy = article.ModifiedBy,
