@@ -25,4 +25,8 @@
     <ProjectReference Include="..\home-wiki-backend.DAL\home-wiki-backend.DAL.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Models\" />
+  </ItemGroup>
+
 </Project>
