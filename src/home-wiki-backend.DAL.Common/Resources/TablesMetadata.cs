@@ -1,4 +1,4 @@
-﻿namespace HomeWiki.DAL.Resources.Constants;
+﻿namespace home_wiki_backend.DAL.Common.Resources;
 
 public static class TablesMetadata
 {

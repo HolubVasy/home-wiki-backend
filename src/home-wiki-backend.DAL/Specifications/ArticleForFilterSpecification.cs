@@ -1,4 +1,5 @@
 ﻿using home_wiki_backend.DAL.Common.Models.Entities;
+using home_wiki_backend.Shared.Models.Dtos;
 
 /// <summary>
 /// Specification for retrieving articles by category.
@@ -9,9 +10,8 @@ public sealed class ArticleForFilterSpecification :
     /// <summary>
     /// Initializes a new instance of the <see cref="ArticleForFilterSpecification"/> class.
     /// </summary>
-    /// <param name="categoryId">The ID of the category to filter articles by.</param>
-    public ArticleForFilterSpecification(int categoryId)
-        : base(a => a.CategoryId == categoryId)
+    /// <param name="pageFilterData">Data for filtered paging.</param>
+    public ArticleForFilterSpecification(ArticleFilterRequestDto pageFilterData)
     {
         // Include the related Category and Tags
         AddInclude(a => a.Category);

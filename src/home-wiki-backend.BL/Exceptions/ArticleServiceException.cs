@@ -1,6 +1,6 @@
 ﻿using home_wiki_backend.DAL.Common.Models.Exceptions;
 
-namespace home_wiki_backend.DAL.Exceptions
+namespace home_wiki_backend.BL.Exceptions
 {
     /// <summary>
     /// Represents errors that occur during repository operations.

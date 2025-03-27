@@ -1,10 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using HomeWiki.DAL.Resources.Constants;
-using home_wiki_backend.DAL.Configurations;
 using home_wiki_backend.DAL.Common.Models.Entities;
+using home_wiki_backend.DAL.Common.Resources;
 
-namespace HomeWiki.DAL.EntitiesConfiguration;
+namespace home_wiki_backend.DAL.Configurations;
 
 public class ArticleConfiguration : IEntityTypeConfiguration<Article>
 {

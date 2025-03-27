@@ -1,7 +1,7 @@
-﻿using home_wiki_backend.BL.Common.Enums;
+﻿using home_wiki_backend.Shared.Enums;
 using System.Collections.Immutable;
 
-namespace home_wiki_backend.BL.Models
+namespace home_wiki_backend.Shared.Models.Dtos
 {
     public sealed class ArticleFilterRequestDto
     {

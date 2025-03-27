@@ -2,7 +2,7 @@
 using home_wiki_backend.DAL.Common.Models.Entities;
 using home_wiki_backend.DAL.Data;
 
-namespace home_wiki_backend.Seeders;
+namespace home_wiki_backend.Data.Seeders;
 
 /// <summary>
 /// Initial seeder for the database.

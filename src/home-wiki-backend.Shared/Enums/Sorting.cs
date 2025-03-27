@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel;
 
-namespace home_wiki_backend.BL.Common.Enums
+namespace home_wiki_backend.Shared.Enums
 {
     public enum Sorting
     {

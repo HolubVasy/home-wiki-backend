@@ -10,8 +10,10 @@ using home_wiki_backend.Shared.Models.Results.Generic;
 using home_wiki_backend.Shared.Enums;
 using home_wiki_backend.Shared.Helpers;
 using home_wiki_backend.Shared.Models.Results.Errors;
-using home_wiki_backend.BL.Models;
-using home_wiki_backend.BL.Extensions;
+using home_wiki_backend.Shared.Extensions;
+using home_wiki_backend.BL.Common.Models.Responses;
+using home_wiki_backend.DAL.Extensions;
+using home_wiki_backend.Shared.Models.Dtos;
 
 namespace home_wiki_backend.BL.Services
 {

@@ -1,8 +1,9 @@
 ﻿using System.Text;
+using home_wiki_backend.BL.Exceptions;
 using home_wiki_backend.DAL.Exceptions;
 using home_wiki_backend.Shared.Enums;
 
-namespace Andersen.Infrastructure.API
+namespace home_wiki_backend.Middleware
 {
     /// <summary>
     /// Middleware to handle exceptions and provide a consistent error response.
