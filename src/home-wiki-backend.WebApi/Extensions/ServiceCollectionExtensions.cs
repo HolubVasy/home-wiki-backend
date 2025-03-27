@@ -4,7 +4,7 @@ using home_wiki_backend.Contracts;
 using home_wiki_backend.DAL.Common.Contracts;
 using home_wiki_backend.DAL.Common.Models.Entities;
 using home_wiki_backend.DAL.Repositories;
-using home_wiki_backend.Data.Seeders;
+using home_wiki_backend.Seeders;
 
 namespace home_wiki_backend.Extensions
 {

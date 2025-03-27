@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
+using home_wiki_backend.BL.Common.Contracts.Services;
 using home_wiki_backend.BL.Common.Models.Requests;
 using home_wiki_backend.DAL.Common.Contracts;
 using home_wiki_backend.DAL.Common.Models.Entities;
@@ -9,11 +10,10 @@ using home_wiki_backend.Shared.Models.Results.Generic;
 using home_wiki_backend.Shared.Enums;
 using home_wiki_backend.Shared.Helpers;
 using home_wiki_backend.Shared.Models.Results.Errors;
+using home_wiki_backend.BL.Models;
+using home_wiki_backend.BL.Extensions;
 using home_wiki_backend.Shared.Extensions;
 using home_wiki_backend.BL.Common.Models.Responses;
-using home_wiki_backend.DAL.Extensions;
-using home_wiki_backend.Shared.Models.Dtos;
-using home_wiki_backend.BL.Common.Contracts.Services;
 using home_wiki_backend.DAL.Common.Contracts.Specifications;
 using home_wiki_backend.DAL.Specifications;
 
@@ -93,7 +93,8 @@ namespace home_wiki_backend.BL.Services
             {
                 _logger.LogInformation("Getting article by ID: {Id}", id);
                 var article = await _articleRepo.FirstOrDefaultAsync(id,
-                    new ArticlesWithCategoryAndTagsSpecification(), cancellationToken);
+                    new ArticlesWithCategoryAndTagsSpecification(), 
+                    cancellationToken);
                 return GetById(id, article);
             }
             catch (Exception ex)

@@ -1,9 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using HomeWiki.DAL.Resources.Constants;
+using home_wiki_backend.DAL.Configurations;
 using home_wiki_backend.DAL.Common.Models.Entities;
-using home_wiki_backend.DAL.Common.Resources;
 
-namespace home_wiki_backend.DAL.Configurations;
+namespace HomeWiki.DAL.EntitiesConfiguration;
 
 public class TagConfiguration : IEntityTypeConfiguration<Tag>
 {

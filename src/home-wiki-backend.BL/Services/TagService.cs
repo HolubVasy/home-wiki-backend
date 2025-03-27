@@ -10,7 +10,6 @@ using home_wiki_backend.Shared.Enums;
 using home_wiki_backend.Shared.Helpers;
 using home_wiki_backend.Shared.Models.Results.Errors;
 using home_wiki_backend.Shared.Models;
-using home_wiki_backend.BL.Common.Models.Responses;
 using home_wiki_backend.DAL.Common.Contracts.Specifications;
 
 namespace home_wiki_backend.BL.Services

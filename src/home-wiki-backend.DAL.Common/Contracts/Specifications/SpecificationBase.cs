@@ -16,7 +16,7 @@ public abstract class SpecificationBase<T> : ISpecification<T>
     /// <summary>
     /// Gets the filter criteria for the specification.
     /// </summary>
-    public Expression<Func<T, bool>>? Criteria { get; }
+    public Expression<Func<T, bool>>? Criteria { get; private set; }
 
     /// <summary>
     /// Gets the list of include expressions for related entities.
@@ -42,6 +42,15 @@ public abstract class SpecificationBase<T> : ISpecification<T>
     protected void ApplySorting(Func<IQueryable<T>, IOrderedQueryable<T>>? sorting)
     {
         Sorting = sorting;
+    }
+
+    /// <summary>
+    /// Applies an filter criteria for the specification.
+    /// </summary>
+    /// <param name="criteria">Sorting data.</param>
+    protected void ApplyCriteria(Expression<Func<T, bool>>? criteria)
+    {
+        Criteria = criteria;
     }
 
 }

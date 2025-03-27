@@ -1,4 +1,4 @@
-﻿namespace home_wiki_backend.DAL.Common.Resources;
+﻿namespace home_wiki_backend.DAL.Configurations;
 /// <summary>
 /// Constant set, used for making length restriction for a
 /// string type column in a database.

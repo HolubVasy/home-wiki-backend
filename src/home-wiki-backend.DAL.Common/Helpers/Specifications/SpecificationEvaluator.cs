@@ -1,11 +1,12 @@
 ﻿using home_wiki_backend.DAL.Common.Contracts.Specifications;
 using Microsoft.EntityFrameworkCore;
 
-namespace home_wiki_backend.DAL.Common.Helpers.Specifications;
+namespace home_wiki_backend.DAL.Specifications.Common;
 
 public static class SpecificationEvaluator<T> where T : class
 {
-    public static IQueryable<T> GetQuery(IQueryable<T> inputQuery, ISpecification<T> specification)
+    public static IQueryable<T> GetQuery(IQueryable<T> inputQuery,
+                                         ISpecification<T> specification)
     {
         var query = inputQuery;
 

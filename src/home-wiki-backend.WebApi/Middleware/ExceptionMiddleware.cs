@@ -3,7 +3,7 @@ using home_wiki_backend.BL.Exceptions;
 using home_wiki_backend.DAL.Exceptions;
 using home_wiki_backend.Shared.Enums;
 
-namespace home_wiki_backend.Middleware
+namespace Andersen.Infrastructure.API
 {
     /// <summary>
     /// Middleware to handle exceptions and provide a consistent error response.

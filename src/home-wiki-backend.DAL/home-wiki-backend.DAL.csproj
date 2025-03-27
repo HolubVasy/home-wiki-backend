@@ -24,4 +24,8 @@
     <ProjectReference Include="..\home-wiki-backend.DAL.Common\home-wiki-backend.DAL.Common.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="NewFolder\" />
+  </ItemGroup>
+
 </Project>
