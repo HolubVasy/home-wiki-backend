@@ -1,4 +1,5 @@
-﻿using home_wiki_backend.Shared.Contracts;
+﻿using home_wiki_backend.DAL.Common.Contracts.Specifications;
+using home_wiki_backend.Shared.Contracts;
 using home_wiki_backend.Shared.Models;
 using System.Linq.Expressions;
 

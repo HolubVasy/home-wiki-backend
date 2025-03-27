@@ -1,5 +1,7 @@
 ﻿using System.Linq.Expressions;
 
+namespace home_wiki_backend.DAL.Common.Contracts.Specifications;
+
 /// <summary>
 /// Represents a specification pattern that encapsulates the
 /// criteria and logic for querying entities.
@@ -18,12 +20,7 @@ public interface ISpecification<T>
     List<Expression<Func<T, object>>> Includes { get; }
 
     /// <summary>
-    /// Gets the expression for ordering the results in ascending order.
+    /// Gets the expression for sorting the results in ascending order.
     /// </summary>
-    Expression<Func<T, object>>? OrderBy { get; }
-
-    /// <summary>
-    /// Gets the expression for ordering the results in descending order.
-    /// </summary>
-    Expression<Func<T, object>>? OrderByDescending { get; }
+    Func<IQueryable<T>, IOrderedQueryable<T>>? Sorting { get; }
 }

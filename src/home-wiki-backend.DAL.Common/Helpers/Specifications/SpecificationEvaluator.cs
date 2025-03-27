@@ -1,6 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using home_wiki_backend.DAL.Common.Contracts.Specifications;
+using Microsoft.EntityFrameworkCore;
 
-namespace home_wiki_backend.DAL.Specifications;
+namespace home_wiki_backend.DAL.Common.Helpers.Specifications;
 
 public static class SpecificationEvaluator<T> where T : class
 {
@@ -13,14 +14,14 @@ public static class SpecificationEvaluator<T> where T : class
             query = query.Where(specification.Criteria);
 
         // Apply include expressions
-        query = specification.Includes.Aggregate(query, static (current, include) => 
+        query = specification.Includes.Aggregate(query, static (current, include) =>
         current.Include(include));
 
         // Apply ordering if provided
-        if (specification.OrderBy != null)
-            query = query.OrderBy(specification.OrderBy);
-        else if (specification.OrderByDescending != null)
-            query = query.OrderByDescending(specification.OrderByDescending);
+        if (specification.Sorting is not null)
+        {
+            query = specification.Sorting(query);
+        }
 
         return query;
     }

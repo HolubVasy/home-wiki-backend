@@ -1,7 +1,6 @@
 ﻿using System.Linq.Expressions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using home_wiki_backend.BL.Common.Contracts.Services;
 using home_wiki_backend.BL.Common.Models.Requests;
 using home_wiki_backend.DAL.Common.Contracts;
 using home_wiki_backend.DAL.Common.Models.Entities;
@@ -14,6 +13,9 @@ using home_wiki_backend.Shared.Extensions;
 using home_wiki_backend.BL.Common.Models.Responses;
 using home_wiki_backend.DAL.Extensions;
 using home_wiki_backend.Shared.Models.Dtos;
+using home_wiki_backend.BL.Common.Contracts.Services;
+using home_wiki_backend.DAL.Common.Contracts.Specifications;
+using home_wiki_backend.DAL.Specifications;
 
 namespace home_wiki_backend.BL.Services
 {

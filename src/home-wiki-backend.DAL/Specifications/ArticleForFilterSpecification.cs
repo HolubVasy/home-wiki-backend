@@ -1,5 +1,8 @@
-﻿using home_wiki_backend.DAL.Common.Models.Entities;
+﻿using home_wiki_backend.DAL.Common.Contracts.Specifications;
+using home_wiki_backend.DAL.Common.Models.Entities;
 using home_wiki_backend.Shared.Models.Dtos;
+
+namespace home_wiki_backend.DAL.Specifications;
 
 /// <summary>
 /// Specification for retrieving articles by category.
@@ -14,10 +17,10 @@ public sealed class ArticleForFilterSpecification :
     public ArticleForFilterSpecification(ArticleFilterRequestDto pageFilterData)
     {
         // Include the related Category and Tags
-        AddInclude(a => a.Category);
-        AddInclude(a => a.Tags!);
+        AddInclude(article => article.Category);
+        AddInclude(article => article.Tags!);
 
         // Optionally, apply ordering
-        ApplyOrderBy(a => a.Name);
+        ApplySorting(article => article.OrderBy(a => a.Name));
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System.Linq.Expressions;
 
+namespace home_wiki_backend.DAL.Common.Contracts.Specifications;
+
 public abstract class SpecificationBase<T> : ISpecification<T>
 {
     /// <summary>
@@ -22,15 +24,7 @@ public abstract class SpecificationBase<T> : ISpecification<T>
     public List<Expression<Func<T, object>>> Includes { get; } =
         new List<Expression<Func<T, object>>>();
 
-    /// <summary>
-    /// Gets the expression for ordering the results in ascending order.
-    /// </summary>
-    public Expression<Func<T, object>>? OrderBy { get; private set; }
-
-    /// <summary>
-    /// Gets the expression for ordering the results in descending order.
-    /// </summary>
-    public Expression<Func<T, object>>? OrderByDescending { get; private set; }
+    public Func<IQueryable<T>, IOrderedQueryable<T>>? Sorting { get; private set; }
 
     /// <summary>
     /// Adds an include expression for related entities.
@@ -44,19 +38,10 @@ public abstract class SpecificationBase<T> : ISpecification<T>
     /// <summary>
     /// Applies an ascending order by expression.
     /// </summary>
-    /// <param name="orderByExpression">The order by expression.</param>
-    protected void ApplyOrderBy(Expression<Func<T, object>> orderByExpression)
+    /// <param name="sorting">Sorting data.</param>
+    protected void ApplySorting(Func<IQueryable<T>, IOrderedQueryable<T>>? sorting)
     {
-        OrderBy = orderByExpression;
+        Sorting = sorting;
     }
 
-    /// <summary>
-    /// Applies a descending order by expression.
-    /// </summary>
-    /// <param name="orderByDescendingExpression">The order by descending expression.</param>
-    protected void ApplyOrderByDescending(Expression<Func<T, object>> 
-        orderByDescendingExpression)
-    {
-        OrderByDescending = orderByDescendingExpression;
-    }
 }
