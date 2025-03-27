@@ -19,8 +19,8 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <returns>A task that represents the asynchronous operation. 
         /// The task result contains the result model with the created 
         /// article response.</returns>
-        Task<ResultModel<ArticleResponse>> CreateAsync(
-            ArticleRequest article,
+        Task<ResultModel<ArticleResponseDto>> CreateAsync(
+            ArticleRequestDto article,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -31,7 +31,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <returns>A task that represents the asynchronous operation.
         /// The task result contains the result model with the article 
         /// response.</returns>
-        Task<ResultModel<ArticleResponse>> GetByIdAsync(
+        Task<ResultModel<ArticleResponseDto>> GetByIdAsync(
             int id,
             CancellationToken cancellationToken = default);
 
@@ -45,9 +45,9 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <returns>A task that represents the asynchronous operation.
         /// The task result contains the result models with the article 
         /// responses.</returns>
-        Task<ResultModels<ArticleResponse>> GetAsync(
-            Expression<Func<ArticleRequest, bool>>? predicate = default,
-            Func<IQueryable<ArticleRequest>, IOrderedQueryable<ArticleRequest>>?
+        Task<ResultModels<ArticleResponseDto>> GetAsync(
+            Expression<Func<ArticleRequestDto, bool>>? predicate = default,
+            Func<IQueryable<ArticleRequestDto>, IOrderedQueryable<ArticleRequestDto>>?
             orderBy = default,
             CancellationToken cancellationToken = default);
 
@@ -63,11 +63,11 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <returns>A task that represents the asynchronous operation. 
         /// The task result contains the result models with the article 
         /// responses.</returns>
-        Task<ResultModel<PagedList<ArticleResponse>>> GetPagedAsync(
+        Task<ResultModel<PagedList<ArticleResponseDto>>> GetPagedAsync(
             int pageNumber, int pageSize,
-            Expression<Func<ArticleRequest, bool>>? predicate = default,
-            Func<IQueryable<ArticleRequest>,
-                IOrderedQueryable<ArticleRequest>>? orderBy = default,
+            Expression<Func<ArticleRequestDto, bool>>? predicate = default,
+            Func<IQueryable<ArticleRequestDto>,
+                IOrderedQueryable<ArticleRequestDto>>? orderBy = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -78,8 +78,8 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <returns>A task that represents the asynchronous operation. 
         /// The task result contains the result model with the updated 
         /// article response.</returns>
-        Task<ResultModel<ArticleResponse>> UpdateAsync(
-            ArticleRequest article,
+        Task<ResultModel<ArticleResponseDto>> UpdateAsync(
+            ArticleRequestDto article,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -90,7 +90,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <returns>A task that represents the asynchronous operation. 
         /// The task result contains the result model with the deletion 
         /// result.</returns>
-        Task<ResultModel<ArticleResponse>> DeleteAsync(
+        Task<ResultModel<ArticleResponseDto>> DeleteAsync(
             int id,
             CancellationToken cancellationToken = default);
 
@@ -102,8 +102,8 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <returns>A task that represents the asynchronous operation. 
         /// The task result contains the result model with the removal
         /// result.</returns>
-        Task<ResultModel<ArticleResponse>> RemoveAsync(
-            ArticleRequest article,
+        Task<ResultModel<ArticleResponseDto>> RemoveAsync(
+            ArticleRequestDto article,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// The task result contains a boolean value indicating whether 
         /// any articles match the predicate.</returns>
         Task<bool> AnyAsync(
-            Expression<Func<ArticleRequest, bool>>? predicate = default,
+            Expression<Func<ArticleRequestDto, bool>>? predicate = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -138,8 +138,8 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <returns>A task that represents the asynchronous operation.
         /// The task result contains the result model with the first 
         /// matching article response.</returns>
-        Task<ResultModel<ArticleResponse>> FirstOrDefault(
-            Expression<Func<ArticleRequest, bool>>? predicate = default,
+        Task<ResultModel<ArticleResponseDto>> FirstOrDefault(
+            Expression<Func<ArticleRequestDto, bool>>? predicate = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -149,7 +149,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation.
         /// The task result contains the result models with the article responses.</returns>
-        Task<ResultModels<ArticleResponse>> GetListAsync(
+        Task<ResultModels<ArticleResponseDto>> GetListAsync(
             ISpecification<Article> specification,
             CancellationToken cancellationToken = default);
 
@@ -162,7 +162,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A task that represents the asynchronous operation.
         /// The task result contains the result models with the article responses.</returns>
-        Task<ResultModel<PagedList<ArticleResponse>>> GetPagedAsync(
+        Task<ResultModel<PagedList<ArticleResponseDto>>> GetPagedAsync(
             int pageNumber, int pageSize,
             ISpecification<Article> specification,
             CancellationToken cancellationToken = default);

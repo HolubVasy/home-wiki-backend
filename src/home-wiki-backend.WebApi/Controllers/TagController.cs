@@ -28,9 +28,9 @@ namespace home_wiki_backend.Controllers
         /// <param name="tag">The tag request model.</param>
         /// <returns>A result model containing the created tag response.</returns>
         [HttpPost]
-        [ProducesResponseType(typeof(TagResponse), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(TagResponse), StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<TagResponse>> Create([FromBody] TagRequest tag)
+        [ProducesResponseType(typeof(TagResponseDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(TagResponseDto), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<TagResponseDto>> Create([FromBody] TagRequestDto tag)
         {
             var result = await _tagService.CreateAsync(tag);
             if (result.Success)
@@ -46,9 +46,9 @@ namespace home_wiki_backend.Controllers
         /// <param name="id">The tag identifier.</param>
         /// <returns>A result model containing the tag response.</returns>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(TagResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(TagResponse), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<TagResponse>> GetById(int id)
+        [ProducesResponseType(typeof(TagResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(TagResponseDto), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<TagResponseDto>> GetById(int id)
         {
             var result = await _tagService.GetByIdAsync(id);
             if (result.Success)
@@ -63,9 +63,9 @@ namespace home_wiki_backend.Controllers
         /// </summary>
         /// <returns>A result model containing a list of tag responses.</returns>
         [HttpGet]
-        [ProducesResponseType(typeof(IList<TagResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(IList<TagResponse>), StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IList<TagResponse>>> GetAll()
+        [ProducesResponseType(typeof(IList<TagResponseDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IList<TagResponseDto>), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<IList<TagResponseDto>>> GetAll()
         {
             var result = await _tagService.GetAsync();
             if (result.Success)
@@ -81,9 +81,9 @@ namespace home_wiki_backend.Controllers
         /// <param name="tag">The tag request model.</param>
         /// <returns>A result model containing the updated tag response.</returns>
         [HttpPut]
-        [ProducesResponseType(typeof(TagResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(TagResponse), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<TagResponse>> Update([FromBody] TagRequest tag)
+        [ProducesResponseType(typeof(TagResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(TagResponseDto), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<TagResponseDto>> Update([FromBody] TagRequestDto tag)
         {
             var result = await _tagService.UpdateAsync(tag);
             if (result.Success)
@@ -99,9 +99,9 @@ namespace home_wiki_backend.Controllers
         /// <param name="id">The tag identifier.</param>
         /// <returns>A result model indicating the deletion result.</returns>
         [HttpDelete("{id}")]
-        [ProducesResponseType(typeof(TagResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(TagResponse), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<TagResponse>> Delete(int id)
+        [ProducesResponseType(typeof(TagResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(TagResponseDto), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<TagResponseDto>> Delete(int id)
         {
             var result = await _tagService.DeleteAsync(id);
             if (result.Success)
@@ -117,8 +117,8 @@ namespace home_wiki_backend.Controllers
         /// <param name="tag">The tag request model.</param>
         /// <returns>A result model indicating the removal result.</returns>
         [HttpPost("remove")]
-        [ProducesResponseType(typeof(TagResponse), StatusCodes.Status200OK)]
-        public async Task<ActionResult<TagResponse>> Remove([FromBody] TagRequest tag)
+        [ProducesResponseType(typeof(TagResponseDto), StatusCodes.Status200OK)]
+        public async Task<ActionResult<TagResponseDto>> Remove([FromBody] TagRequestDto tag)
         {
             var result = await _tagService.RemoveAsync(tag);
             if (result.Success)

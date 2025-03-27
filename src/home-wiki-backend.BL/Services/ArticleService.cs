@@ -10,6 +10,8 @@ using home_wiki_backend.Shared.Models.Results.Generic;
 using home_wiki_backend.Shared.Enums;
 using home_wiki_backend.Shared.Helpers;
 using home_wiki_backend.Shared.Models.Results.Errors;
+using home_wiki_backend.BL.Models;
+using home_wiki_backend.BL.Extensions;
 
 namespace home_wiki_backend.BL.Services
 {
@@ -28,8 +30,8 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModel<ArticleResponse>> CreateAsync(
-            ArticleRequest article,
+        public async Task<ResultModel<ArticleResponseDto>> CreateAsync(
+            ArticleRequestDto article,
             CancellationToken cancellationToken = default)
         {
             try
@@ -48,12 +50,12 @@ namespace home_wiki_backend.BL.Services
                     cancellationToken);
                 _logger.LogInformation("Article created with ID: {Id}",
                     created.Id);
-                return new ResultModel<ArticleResponse>
+                return new ResultModel<ArticleResponseDto>
                 {
                     Success = true,
                     Message = "Article created successfully",
                     Code = StatusCodes.Status201Created,
-                    Data = new ArticleResponse
+                    Data = new ArticleResponseDto
                     {
                         Id = created.Id,
                         Name = created.Name,
@@ -68,7 +70,7 @@ namespace home_wiki_backend.BL.Services
             {
                 _logger.LogError(ex, "Error creating article: {Name}",
                     article.Name);
-                return new ResultModel<ArticleResponse>
+                return new ResultModel<ArticleResponseDto>
                 {
                     Success = false,
                     Message = "Error creating article",
@@ -79,7 +81,7 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModel<ArticleResponse>> GetByIdAsync(
+        public async Task<ResultModel<ArticleResponseDto>> GetByIdAsync(
             int id,
             CancellationToken cancellationToken = default)
         {
@@ -97,7 +99,7 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModel<ArticleResponse>> GetByIdAsync(
+        public async Task<ResultModel<ArticleResponseDto>> GetByIdAsync(
             int id,
             ISpecification<Article> specification,
             CancellationToken cancellationToken = default)
@@ -116,21 +118,21 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModels<ArticleResponse>> GetAsync(
-            Expression<Func<ArticleRequest, bool>>? predicate = null,
-            Func<IQueryable<ArticleRequest>, IOrderedQueryable<ArticleRequest>>?
+        public async Task<ResultModels<ArticleResponseDto>> GetAsync(
+            Expression<Func<ArticleRequestDto, bool>>? predicate = null,
+            Func<IQueryable<ArticleRequestDto>, IOrderedQueryable<ArticleRequestDto>>?
                 orderBy = null,
             CancellationToken cancellationToken = default)
         {
             try
             {
                 _logger.LogInformation("Retrieving articles with filters.");
-                var artPred = predicate?.ConvertTo<ArticleRequest, Article>();
+                var artPred = predicate?.ConvertTo<ArticleRequestDto, Article>();
                 var articles = await _articleRepo.GetAsync(
                     artPred,
-                    orderBy?.ConvertTo<ArticleRequest, Article>(),
+                    orderBy?.ConvertTo<ArticleRequestDto, Article>(),
                     cancellationToken);
-                var data = articles.Select(a => new ArticleResponse
+                var data = articles.Select(a => new ArticleResponseDto
                 {
                     Id = a.Id,
                     Name = a.Name,
@@ -141,7 +143,7 @@ namespace home_wiki_backend.BL.Services
                     ModifiedBy = a.ModifiedBy,
                     ModifiedAt = a.ModifiedAt
                 }).ToList();
-                return new ResultModels<ArticleResponse>
+                return new ResultModels<ArticleResponseDto>
                 {
                     Success = true,
                     Message = "Articles retrieved successfully",
@@ -152,7 +154,7 @@ namespace home_wiki_backend.BL.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving articles.");
-                return new ResultModels<ArticleResponse>
+                return new ResultModels<ArticleResponseDto>
                 {
                     Success = false,
                     Message = "Error retrieving articles",
@@ -163,11 +165,11 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModel<PagedList<ArticleResponse>>> GetPagedAsync(
+        public async Task<ResultModel<PagedList<ArticleResponseDto>>> GetPagedAsync(
             int pageNumber,
             int pageSize,
-            Expression<Func<ArticleRequest, bool>>? predicate = null,
-            Func<IQueryable<ArticleRequest>, IOrderedQueryable<ArticleRequest>>?
+            Expression<Func<ArticleRequestDto, bool>>? predicate = null,
+            Func<IQueryable<ArticleRequestDto>, IOrderedQueryable<ArticleRequestDto>>?
                 orderBy = null,
             CancellationToken cancellationToken = default)
         {
@@ -175,12 +177,12 @@ namespace home_wiki_backend.BL.Services
             {
                 _logger.LogInformation("Fetching paged articles. " +
                     "Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
-                var artPred = predicate?.ConvertTo<ArticleRequest, Article>();
+                var artPred = predicate?.ConvertTo<ArticleRequestDto, Article>();
                 var paged = await _articleRepo.GetPagedAsync(
                     pageNumber,
                     pageSize,
                     artPred,
-                    orderBy?.ConvertTo<ArticleRequest, Article>(),
+                    orderBy?.ConvertTo<ArticleRequestDto, Article>(),
                     cancellationToken);
                 return GetPaged(pageNumber, pageSize, paged);
             }
@@ -191,7 +193,39 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModel<PagedList<ArticleResponse>>> GetPagedAsync(
+        public async Task<ResultModel<PagedList<ArticleResponseDto>>> GetPageAsync(
+            ArticleFilterRequestDto filter,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                Log(filter);
+                var predicate = filter.GetPredicate();
+                var paged = await _articleRepo.GetPagedAsync(
+                    filter.PageNumber,
+                    filter.PageSize,
+                    filter.GetPredicate(),
+                    filter.GetOrderBy()
+                    );
+                return GetPaged(filter.PageNumber, filter.PageSize, paged);
+
+            }
+            catch (Exception ex)
+            {
+                return ReturnFailed(ex);
+            }
+        }
+
+        private void Log(ArticleFilterRequestDto filter)
+        {
+            _logger.LogInformation("Fetching paged articles. " +
+                                "Page: {PageNumber}, Size: {PageSize}, Sorting: {Sorting}",
+                                filter.PageNumber, filter.PageSize,
+                                filter.Sorting.GetStringRepresentation());
+        }
+
+        /// <inheritdoc/>
+        public async Task<ResultModel<PagedList<ArticleResponseDto>>> GetPagedAsync(
             int pageNumber,
             int pageSize,
             ISpecification<Article> specification,
@@ -213,8 +247,8 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModel<ArticleResponse>> UpdateAsync(
-            ArticleRequest article,
+        public async Task<ResultModel<ArticleResponseDto>> UpdateAsync(
+            ArticleRequestDto article,
             CancellationToken cancellationToken = default)
         {
             try
@@ -226,7 +260,7 @@ namespace home_wiki_backend.BL.Services
                 {
                     _logger.LogWarning("Article with ID {Id} not found.",
                         article.Id);
-                    return new ResultModel<ArticleResponse>
+                    return new ResultModel<ArticleResponseDto>
                     {
                         Success = false,
                         Message = $"Article with ID {article.Id} not found.",
@@ -249,12 +283,12 @@ namespace home_wiki_backend.BL.Services
                     ModifiedAt = DateTime.UtcNow
                 };
                 await _articleRepo.UpdateAsync(updated, cancellationToken);
-                return new ResultModel<ArticleResponse>
+                return new ResultModel<ArticleResponseDto>
                 {
                     Success = true,
                     Message = "Article updated successfully",
                     Code = StatusCodes.Status200OK,
-                    Data = new ArticleResponse
+                    Data = new ArticleResponseDto
                     {
                         Id = updated.Id,
                         Name = updated.Name,
@@ -271,7 +305,7 @@ namespace home_wiki_backend.BL.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error updating article ID: {Id}", article.Id);
-                return new ResultModel<ArticleResponse>
+                return new ResultModel<ArticleResponseDto>
                 {
                     Success = false,
                     Message = "Error updating article",
@@ -282,7 +316,7 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModel<ArticleResponse>> DeleteAsync(
+        public async Task<ResultModel<ArticleResponseDto>> DeleteAsync(
             int id,
             CancellationToken cancellationToken = default)
         {
@@ -294,7 +328,7 @@ namespace home_wiki_backend.BL.Services
                 {
                     var errorMessage = $"Article with ID: {id} not exists";
                     _logger.LogInformation(errorMessage);
-                    return new ResultModel<ArticleResponse>
+                    return new ResultModel<ArticleResponseDto>
                     {
                         Success = false,
                         Message = errorMessage,
@@ -303,7 +337,7 @@ namespace home_wiki_backend.BL.Services
                     };
                 }
                 await _articleRepo.RemoveAsync(a => a.Id == id, cancellationToken);
-                return new ResultModel<ArticleResponse>
+                return new ResultModel<ArticleResponseDto>
                 {
                     Success = true,
                     Message = "Article deleted successfully",
@@ -315,7 +349,7 @@ namespace home_wiki_backend.BL.Services
             {
                 var errorMessage = $"Error deleting article ID: {id}";
                 _logger.LogError(ex, errorMessage);
-                return new ResultModel<ArticleResponse>
+                return new ResultModel<ArticleResponseDto>
                 {
                     Success = false,
                     Message = errorMessage,
@@ -326,8 +360,8 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModel<ArticleResponse>> RemoveAsync(
-            ArticleRequest article,
+        public async Task<ResultModel<ArticleResponseDto>> RemoveAsync(
+            ArticleRequestDto article,
             CancellationToken cancellationToken = default)
         {
             try
@@ -335,7 +369,7 @@ namespace home_wiki_backend.BL.Services
                 _logger.LogInformation("Removing article: {Name}", article.Name);
                 await _articleRepo.RemoveAsync(
                     a => a.Name == article.Name, cancellationToken);
-                return new ResultModel<ArticleResponse>
+                return new ResultModel<ArticleResponseDto>
                 {
                     Success = true,
                     Message = "Article removed successfully",
@@ -346,7 +380,7 @@ namespace home_wiki_backend.BL.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error removing article: {Name}", article.Name);
-                return new ResultModel<ArticleResponse>
+                return new ResultModel<ArticleResponseDto>
                 {
                     Success = false,
                     Message = "Error removing article",
@@ -374,12 +408,12 @@ namespace home_wiki_backend.BL.Services
 
         /// <inheritdoc/>
         public async Task<bool> AnyAsync(
-            Expression<Func<ArticleRequest, bool>>? predicate = null,
+            Expression<Func<ArticleRequestDto, bool>>? predicate = null,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                var artPred = predicate?.ConvertTo<ArticleRequest, Article>();
+                var artPred = predicate?.ConvertTo<ArticleRequestDto, Article>();
                 return await _articleRepo.ExistsAsync(artPred, cancellationToken);
             }
             catch (Exception ex)
@@ -390,17 +424,17 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModel<ArticleResponse>> FirstOrDefault(
-            Expression<Func<ArticleRequest, bool>>? predicate = null,
+        public async Task<ResultModel<ArticleResponseDto>> FirstOrDefault(
+            Expression<Func<ArticleRequestDto, bool>>? predicate = null,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                var artPred = predicate?.ConvertTo<ArticleRequest, Article>();
+                var artPred = predicate?.ConvertTo<ArticleRequestDto, Article>();
                 var article = await _articleRepo.FirstOrDefaultAsync(artPred, cancellationToken);
                 if (article == null)
                 {
-                    return new ResultModel<ArticleResponse>
+                    return new ResultModel<ArticleResponseDto>
                     {
                         Success = false,
                         Message = "No matching article found",
@@ -408,12 +442,12 @@ namespace home_wiki_backend.BL.Services
                         Error = new ErrorResultModel("Not found", ErrorCode.Unexpected)
                     };
                 }
-                return new ResultModel<ArticleResponse>
+                return new ResultModel<ArticleResponseDto>
                 {
                     Success = true,
                     Message = "Article retrieved successfully",
                     Code = StatusCodes.Status200OK,
-                    Data = new ArticleResponse
+                    Data = new ArticleResponseDto
                     {
                         Id = article.Id,
                         Name = article.Name,
@@ -429,7 +463,7 @@ namespace home_wiki_backend.BL.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error in FirstOrDefault for articles.");
-                return new ResultModel<ArticleResponse>
+                return new ResultModel<ArticleResponseDto>
                 {
                     Success = false,
                     Message = "Error retrieving first article",
@@ -440,7 +474,7 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModels<ArticleResponse>> GetListAsync(
+        public async Task<ResultModels<ArticleResponseDto>> GetListAsync(
             ISpecification<Article> specification,
             CancellationToken cancellationToken = default)
         {
@@ -448,7 +482,7 @@ namespace home_wiki_backend.BL.Services
             {
                 _logger.LogInformation("Retrieving articles via specification.");
                 var articles = await _articleRepo.ListAsync(specification, cancellationToken);
-                var data = articles.Select(a => new ArticleResponse
+                var data = articles.Select(a => new ArticleResponseDto
                 {
                     Id = a.Id,
                     Name = a.Name,
@@ -460,7 +494,7 @@ namespace home_wiki_backend.BL.Services
                     ModifiedBy = a.ModifiedBy,
                     ModifiedAt = a.ModifiedAt
                 }).ToList();
-                return new ResultModels<ArticleResponse>
+                return new ResultModels<ArticleResponseDto>
                 {
                     Success = true,
                     Message = "Articles retrieved via specification",
@@ -471,7 +505,7 @@ namespace home_wiki_backend.BL.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving articles via specification.");
-                return new ResultModels<ArticleResponse>
+                return new ResultModels<ArticleResponseDto>
                 {
                     Success = false,
                     Message = "Error retrieving articles by specification",
@@ -481,7 +515,7 @@ namespace home_wiki_backend.BL.Services
             }
         }
 
-        private ResultModel<PagedList<ArticleResponse>> GetPaged(
+        private ResultModel<PagedList<ArticleResponseDto>> GetPaged(
             int pageNumber,
             int pageSize,
             PagedList<Article> paged,
@@ -489,12 +523,12 @@ namespace home_wiki_backend.BL.Services
         {
             _logger.LogInformation("Fetching paged articles. " +
                 "Page: {PageNumber}, Size: {PageSize}", pageNumber, pageSize);
-            var data = paged.Items.Select(a => new ArticleResponse
+            var data = paged.Items.Select(a => new ArticleResponseDto
             {
                 Id = a.Id,
                 Name = a.Name,
                 Description = a.Description,
-                Category = new CategoryResponse
+                Category = new CategoryResponseDto
                 {
                     Name = a.Category.Name,
                     CreatedAt = a.Category.CreatedAt,
@@ -507,12 +541,12 @@ namespace home_wiki_backend.BL.Services
                 ModifiedBy = a.ModifiedBy,
                 ModifiedAt = a.ModifiedAt
             }).ToList();
-            return new ResultModel<PagedList<ArticleResponse>>
+            return new ResultModel<PagedList<ArticleResponseDto>>
             {
                 Success = true,
                 Message = "Paged articles retrieved successfully",
                 Code = StatusCodes.Status200OK,
-                Data = new PagedList<ArticleResponse>()
+                Data = new PagedList<ArticleResponseDto>()
                 {
                     Items = data,
                     PageNumber = paged.PageNumber,
@@ -525,10 +559,10 @@ namespace home_wiki_backend.BL.Services
             };
         }
 
-        private ResultModel<PagedList<ArticleResponse>> ReturnFailed(Exception ex)
+        private ResultModel<PagedList<ArticleResponseDto>> ReturnFailed(Exception ex)
         {
             _logger.LogError(ex, "Error retrieving paged articles.");
-            return new ResultModel<PagedList<ArticleResponse>>
+            return new ResultModel<PagedList<ArticleResponseDto>>
             {
                 Success = false,
                 Message = "Error retrieving paged articles",
@@ -537,12 +571,12 @@ namespace home_wiki_backend.BL.Services
             };
         }
 
-        public ResultModel<ArticleResponse> GetById(int id, Article? article)
+        public ResultModel<ArticleResponseDto> GetById(int id, Article? article)
         {
             if (article == null)
             {
                 _logger.LogWarning("Article with ID {Id} not found.", id);
-                return new ResultModel<ArticleResponse>
+                return new ResultModel<ArticleResponseDto>
                 {
                     Success = false,
                     Message = $"Article with ID {id} not found.",
@@ -551,17 +585,17 @@ namespace home_wiki_backend.BL.Services
                                                    ErrorCode.Unexpected)
                 };
             }
-            return new ResultModel<ArticleResponse>
+            return new ResultModel<ArticleResponseDto>
             {
                 Success = true,
                 Message = "Article retrieved successfully",
                 Code = StatusCodes.Status200OK,
-                Data = new ArticleResponse
+                Data = new ArticleResponseDto
                 {
                     Id = article.Id,
                     Name = article.Name,
                     Description = article.Description,
-                    Category = new CategoryResponse
+                    Category = new CategoryResponseDto
                     {
                         Name = article.Category.Name,
                         CreatedAt = article.Category.CreatedAt,
@@ -578,10 +612,10 @@ namespace home_wiki_backend.BL.Services
             };
         }
 
-        private ResultModel<ArticleResponse> ReturnFailedGetById(int id, Exception ex)
+        private ResultModel<ArticleResponseDto> ReturnFailedGetById(int id, Exception ex)
         {
             _logger.LogError(ex, "Error retrieving article by ID: {Id}", id);
-            return new ResultModel<ArticleResponse>
+            return new ResultModel<ArticleResponseDto>
             {
                 Success = false,
                 Message = "Error retrieving article by ID",

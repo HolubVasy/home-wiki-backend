@@ -18,8 +18,8 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The result model containing the created tag response.
         /// </returns>
-        Task<ResultModel<TagResponse>> CreateAsync(
-            TagRequest tag,
+        Task<ResultModel<TagResponseDto>> CreateAsync(
+            TagRequestDto tag,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -28,7 +28,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <param name="id">The tag identifier.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The result model containing the tag response.</returns>
-        Task<ResultModel<TagResponse>> GetByIdAsync(
+        Task<ResultModel<TagResponseDto>> GetByIdAsync(
             int id,
             CancellationToken cancellationToken = default);
 
@@ -40,10 +40,10 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The result models containing the tag responses.
         /// </returns>
-        Task<ResultModels<TagResponse>> GetAsync(
-            Expression<Func<TagRequest, bool>>? predicate = default,
-            Func<IQueryable<TagRequest>,
-                IOrderedQueryable<TagRequest>>? orderBy = default,
+        Task<ResultModels<TagResponseDto>> GetAsync(
+            Expression<Func<TagRequestDto, bool>>? predicate = default,
+            Func<IQueryable<TagRequestDto>,
+                IOrderedQueryable<TagRequestDto>>? orderBy = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -55,11 +55,11 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <param name="orderBy">The function to order tags.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The result models containing the tag responses.</returns>
-        Task<ResultModel<PagedList<TagResponse>>> GetPagedAsync(
+        Task<ResultModel<PagedList<TagResponseDto>>> GetPagedAsync(
             int pageNumber, int pageSize,
-            Expression<Func<TagRequest, bool>>? predicate = default,
-            Func<IQueryable<TagRequest>,
-                IOrderedQueryable<TagRequest>>? orderBy = default,
+            Expression<Func<TagRequestDto, bool>>? predicate = default,
+            Func<IQueryable<TagRequestDto>,
+                IOrderedQueryable<TagRequestDto>>? orderBy = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -70,8 +70,8 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// </param>
         /// <returns>The result model containing the updated tag 
         /// response.</returns>
-        Task<ResultModel<TagResponse>> UpdateAsync(
-            TagRequest tag,
+        Task<ResultModel<TagResponseDto>> UpdateAsync(
+            TagRequestDto tag,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -82,7 +82,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// </param>
         /// <returns>The result model containing the deleted tag 
         /// response.</returns>
-        Task<ResultModel<TagResponse>> DeleteAsync(
+        Task<ResultModel<TagResponseDto>> DeleteAsync(
             int id,
             CancellationToken cancellationToken = default);
 
@@ -93,8 +93,8 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The result model containing the removed tag 
         /// response.</returns>
-        Task<ResultModel<TagResponse>> RemoveAsync(
-            TagRequest tag,
+        Task<ResultModel<TagResponseDto>> RemoveAsync(
+            TagRequestDto tag,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <returns>True if any tags match the predicate, otherwise
         /// false.</returns>
         Task<bool> AnyAsync(
-            Expression<Func<TagRequest, bool>>? predicate = default,
+            Expression<Func<TagRequestDto, bool>>? predicate = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -125,8 +125,8 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The result model containing the first matching
         /// tag response.</returns>
-        Task<ResultModel<TagResponse>> FirstOrDefault(
-            Expression<Func<TagRequest, bool>>? predicate = default,
+        Task<ResultModel<TagResponseDto>> FirstOrDefault(
+            Expression<Func<TagRequestDto, bool>>? predicate = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// tags.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The result models containing the tag responses.</returns>
-        Task<ResultModels<TagResponse>> GetListAsync(
+        Task<ResultModels<TagResponseDto>> GetListAsync(
             ISpecification<Tag> specification,
             CancellationToken cancellationToken = default);
     }

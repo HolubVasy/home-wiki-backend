@@ -28,8 +28,8 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModel<CategoryResponse>> CreateAsync(
-            CategoryRequest category,
+        public async Task<ResultModel<CategoryResponseDto>> CreateAsync(
+            CategoryRequestDto category,
             CancellationToken cancellationToken = default)
         {
             try
@@ -46,12 +46,12 @@ namespace home_wiki_backend.BL.Services
                     cancellationToken);
                 _logger.LogInformation("Category created with ID: {Id}",
                     created.Id);
-                return new ResultModel<CategoryResponse>
+                return new ResultModel<CategoryResponseDto>
                 {
                     Success = true,
                     Message = "Category created successfully",
                     Code = StatusCodes.Status201Created,
-                    Data = new CategoryResponse
+                    Data = new CategoryResponseDto
                     {
                         Id = created.Id,
                         Name = created.Name,
@@ -66,7 +66,7 @@ namespace home_wiki_backend.BL.Services
             {
                 _logger.LogError(ex, "Error creating category: {Name}",
                     category.Name);
-                return new ResultModel<CategoryResponse>
+                return new ResultModel<CategoryResponseDto>
                 {
                     Success = false,
                     Message = "Error creating category",
@@ -78,7 +78,7 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModel<CategoryResponse>> GetByIdAsync(
+        public async Task<ResultModel<CategoryResponseDto>> GetByIdAsync(
             int id,
             CancellationToken cancellationToken = default)
         {
@@ -91,7 +91,7 @@ namespace home_wiki_backend.BL.Services
                 {
                     _logger.LogWarning("Category with ID {Id} " +
                         "not found.", id);
-                    return new ResultModel<CategoryResponse>
+                    return new ResultModel<CategoryResponseDto>
                     {
                         Success = false,
                         Message = $"Category with ID {id} not found.",
@@ -100,12 +100,12 @@ namespace home_wiki_backend.BL.Services
                         ErrorCode.Unexpected)
                     };
                 }
-                return new ResultModel<CategoryResponse>
+                return new ResultModel<CategoryResponseDto>
                 {
                     Success = true,
                     Message = "Category retrieved successfully",
                     Code = StatusCodes.Status200OK,
-                    Data = new CategoryResponse
+                    Data = new CategoryResponseDto
                     {
                         Id = cat.Id,
                         Name = cat.Name,
@@ -120,7 +120,7 @@ namespace home_wiki_backend.BL.Services
             {
                 _logger.LogError(ex, "Error retrieving category by ID:" +
                     " {Id}", id);
-                return new ResultModel<CategoryResponse>
+                return new ResultModel<CategoryResponseDto>
                 {
                     Success = false,
                     Message = "Error retrieving category by ID",
@@ -132,21 +132,21 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModels<CategoryResponse>> GetAsync(
-            Expression<Func<CategoryRequest, bool>>? predicate = null,
-            Func<IQueryable<CategoryRequest>,
-                IOrderedQueryable<CategoryRequest>>? orderBy = null,
+        public async Task<ResultModels<CategoryResponseDto>> GetAsync(
+            Expression<Func<CategoryRequestDto, bool>>? predicate = null,
+            Func<IQueryable<CategoryRequestDto>,
+                IOrderedQueryable<CategoryRequestDto>>? orderBy = null,
             CancellationToken cancellationToken = default)
         {
             try
             {
                 _logger.LogInformation("Getting category list.");
-                var pred = predicate?.ConvertTo<CategoryRequest,
+                var pred = predicate?.ConvertTo<CategoryRequestDto,
                     Category>();
                 var cats = await _catRepo.GetAsync(pred,
-                    orderBy?.ConvertTo<CategoryRequest, Category>(),
+                    orderBy?.ConvertTo<CategoryRequestDto, Category>(),
                     cancellationToken);
-                var data = cats.Select(c => new CategoryResponse
+                var data = cats.Select(c => new CategoryResponseDto
                 {
                     Id = c.Id,
                     Name = c.Name,
@@ -155,7 +155,7 @@ namespace home_wiki_backend.BL.Services
                     ModifiedBy = c.ModifiedBy,
                     ModifiedAt = c.ModifiedAt
                 }).ToList();
-                return new ResultModels<CategoryResponse>
+                return new ResultModels<CategoryResponseDto>
                 {
                     Success = true,
                     Message = "Categories retrieved successfully",
@@ -166,7 +166,7 @@ namespace home_wiki_backend.BL.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving categories.");
-                return new ResultModels<CategoryResponse>
+                return new ResultModels<CategoryResponseDto>
                 {
                     Success = false,
                     Message = "Error retrieving categories",
@@ -178,14 +178,14 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModel<PagedList<CategoryResponse>>>
+        public async Task<ResultModel<PagedList<CategoryResponseDto>>>
             GetPagedAsync(
             int pageNumber,
             int pageSize,
-            Expression<Func<CategoryRequest,
+            Expression<Func<CategoryRequestDto,
                 bool>>? predicate = null,
-            Func<IQueryable<CategoryRequest>,
-                IOrderedQueryable<CategoryRequest>>? orderBy = null,
+            Func<IQueryable<CategoryRequestDto>,
+                IOrderedQueryable<CategoryRequestDto>>? orderBy = null,
             CancellationToken cancellationToken = default)
         {
             try
@@ -193,12 +193,12 @@ namespace home_wiki_backend.BL.Services
                 _logger.LogInformation("Fetching paged categories. " +
                     "Page: {PageNumber}, Size: {PageSize}",
                     pageNumber, pageSize);
-                var pred = predicate?.ConvertTo<CategoryRequest, Category>();
+                var pred = predicate?.ConvertTo<CategoryRequestDto, Category>();
                 var paged = await _catRepo.GetPagedAsync(pageNumber,
                     pageSize, pred,
-                    orderBy?.ConvertTo<CategoryRequest,
+                    orderBy?.ConvertTo<CategoryRequestDto,
                     Category>(), cancellationToken);
-                var data = paged.Items.Select(c => new CategoryResponse
+                var data = paged.Items.Select(c => new CategoryResponseDto
                 {
                     Id = c.Id,
                     Name = c.Name,
@@ -207,12 +207,12 @@ namespace home_wiki_backend.BL.Services
                     ModifiedBy = c.ModifiedBy,
                     ModifiedAt = c.ModifiedAt
                 }).ToList();
-                return new ResultModel<PagedList<CategoryResponse>>
+                return new ResultModel<PagedList<CategoryResponseDto>>
                 {
                     Success = true,
                     Message = "Paged categories retrieved successfully",
                     Code = StatusCodes.Status200OK,
-                    Data = new PagedList<CategoryResponse>()
+                    Data = new PagedList<CategoryResponseDto>()
                     {
                         PageNumber = pageNumber,
                         PageSize = pageSize,
@@ -227,7 +227,7 @@ namespace home_wiki_backend.BL.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving paged categories.");
-                return new ResultModel<PagedList<CategoryResponse>>
+                return new ResultModel<PagedList<CategoryResponseDto>>
                 {
                     Success = false,
                     Message = "Error retrieving paged categories",
@@ -239,8 +239,8 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModel<CategoryResponse>> UpdateAsync(
-            CategoryRequest category,
+        public async Task<ResultModel<CategoryResponseDto>> UpdateAsync(
+            CategoryRequestDto category,
             CancellationToken cancellationToken = default)
         {
             try
@@ -253,7 +253,7 @@ namespace home_wiki_backend.BL.Services
                 {
                     _logger.LogWarning("Category with ID {Id} not" +
                         " found.", category.Id);
-                    return new ResultModel<CategoryResponse>
+                    return new ResultModel<CategoryResponseDto>
                     {
                         Success = false,
                         Message = $"Category with ID {category.Id} " +
@@ -273,12 +273,12 @@ namespace home_wiki_backend.BL.Services
                     ModifiedAt = DateTime.UtcNow
                 };
                 await _catRepo.UpdateAsync(upd, cancellationToken);
-                return new ResultModel<CategoryResponse>
+                return new ResultModel<CategoryResponseDto>
                 {
                     Success = true,
                     Message = "Category updated successfully",
                     Code = StatusCodes.Status200OK,
-                    Data = new CategoryResponse
+                    Data = new CategoryResponseDto
                     {
                         Id = upd.Id,
                         Name = upd.Name,
@@ -293,7 +293,7 @@ namespace home_wiki_backend.BL.Services
             {
                 _logger.LogError(ex, "Error updating category ID: {Id}",
                     category.Id);
-                return new ResultModel<CategoryResponse>
+                return new ResultModel<CategoryResponseDto>
                 {
                     Success = false,
                     Message = "Error updating category",
@@ -305,7 +305,7 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModel<CategoryResponse>> DeleteAsync(
+        public async Task<ResultModel<CategoryResponseDto>> DeleteAsync(
             int id,
             CancellationToken cancellationToken = default)
         {
@@ -315,7 +315,7 @@ namespace home_wiki_backend.BL.Services
                     "{Id}", id);
                 await _catRepo.RemoveAsync(c => c.Id == id,
                     cancellationToken);
-                return new ResultModel<CategoryResponse>
+                return new ResultModel<CategoryResponseDto>
                 {
                     Success = true,
                     Message = "Category deleted successfully",
@@ -327,7 +327,7 @@ namespace home_wiki_backend.BL.Services
             {
                 _logger.LogError(ex, "Error deleting category ID: " +
                     "{Id}", id);
-                return new ResultModel<CategoryResponse>
+                return new ResultModel<CategoryResponseDto>
                 {
                     Success = false,
                     Message = "Error deleting category",
@@ -339,8 +339,8 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModel<CategoryResponse>> RemoveAsync(
-            CategoryRequest category,
+        public async Task<ResultModel<CategoryResponseDto>> RemoveAsync(
+            CategoryRequestDto category,
             CancellationToken cancellationToken = default)
         {
             try
@@ -349,7 +349,7 @@ namespace home_wiki_backend.BL.Services
                     category.Name);
                 await _catRepo.RemoveAsync(c => c.Name == category.Name,
                     cancellationToken);
-                return new ResultModel<CategoryResponse>
+                return new ResultModel<CategoryResponseDto>
                 {
                     Success = true,
                     Message = "Category removed successfully",
@@ -361,7 +361,7 @@ namespace home_wiki_backend.BL.Services
             {
                 _logger.LogError(ex, "Error removing category: {Name}",
                     category.Name);
-                return new ResultModel<CategoryResponse>
+                return new ResultModel<CategoryResponseDto>
                 {
                     Success = false,
                     Message = "Error removing category",
@@ -393,12 +393,12 @@ namespace home_wiki_backend.BL.Services
 
         /// <inheritdoc/>
         public async Task<bool> AnyAsync(
-            Expression<Func<CategoryRequest, bool>>? predicate = null,
+            Expression<Func<CategoryRequestDto, bool>>? predicate = null,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                var pred = predicate?.ConvertTo<CategoryRequest, Category>();
+                var pred = predicate?.ConvertTo<CategoryRequestDto, Category>();
                 return await _catRepo.ExistsAsync(pred, cancellationToken);
             }
             catch (Exception ex)
@@ -409,19 +409,19 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModel<CategoryResponse>> FirstOrDefault(
-            Expression<Func<CategoryRequest, bool>>? predicate = null,
+        public async Task<ResultModel<CategoryResponseDto>> FirstOrDefault(
+            Expression<Func<CategoryRequestDto, bool>>? predicate = null,
             CancellationToken cancellationToken = default)
         {
             try
             {
-                var pred = predicate?.ConvertTo<CategoryRequest,
+                var pred = predicate?.ConvertTo<CategoryRequestDto,
                     Category>();
                 var cat = await _catRepo.FirstOrDefaultAsync(pred,
                     cancellationToken);
                 if (cat == null)
                 {
-                    return new ResultModel<CategoryResponse>
+                    return new ResultModel<CategoryResponseDto>
                     {
                         Success = false,
                         Message = "No matching category found",
@@ -430,12 +430,12 @@ namespace home_wiki_backend.BL.Services
                         ErrorCode.Unexpected)
                     };
                 }
-                return new ResultModel<CategoryResponse>
+                return new ResultModel<CategoryResponseDto>
                 {
                     Success = true,
                     Message = "Category retrieved successfully",
                     Code = StatusCodes.Status200OK,
-                    Data = new CategoryResponse
+                    Data = new CategoryResponseDto
                     {
                         Id = cat.Id,
                         Name = cat.Name,
@@ -450,7 +450,7 @@ namespace home_wiki_backend.BL.Services
             {
                 _logger.LogError(ex, "Error in FirstOrDefault for " +
                     "categories.");
-                return new ResultModel<CategoryResponse>
+                return new ResultModel<CategoryResponseDto>
                 {
                     Success = false,
                     Message = "Error retrieving first category",
@@ -462,7 +462,7 @@ namespace home_wiki_backend.BL.Services
         }
 
         /// <inheritdoc/>
-        public async Task<ResultModels<CategoryResponse>> GetListAsync(
+        public async Task<ResultModels<CategoryResponseDto>> GetListAsync(
             ISpecification<Category> specification,
             CancellationToken cancellationToken = default)
         {
@@ -472,7 +472,7 @@ namespace home_wiki_backend.BL.Services
                     "via specification.");
                 var cats = await _catRepo.ListAsync(specification,
                     cancellationToken);
-                var data = cats.Select(c => new CategoryResponse
+                var data = cats.Select(c => new CategoryResponseDto
                 {
                     Id = c.Id,
                     Name = c.Name,
@@ -481,7 +481,7 @@ namespace home_wiki_backend.BL.Services
                     ModifiedBy = c.ModifiedBy,
                     ModifiedAt = c.ModifiedAt
                 }).ToList();
-                return new ResultModels<CategoryResponse>
+                return new ResultModels<CategoryResponseDto>
                 {
                     Success = true,
                     Message = "Categories retrieved via specification",
@@ -493,7 +493,7 @@ namespace home_wiki_backend.BL.Services
             {
                 _logger.LogError(ex, "Error retrieving categories via" +
                     " specification.");
-                return new ResultModels<CategoryResponse>
+                return new ResultModels<CategoryResponseDto>
                 {
                     Success = false,
                     Message = "Error retrieving categories by specification",

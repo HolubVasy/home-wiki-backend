@@ -29,9 +29,9 @@ namespace home_wiki_backend.Controllers
         /// <param name="article">The article request model.</param>
         /// <returns>A result model containing the created article response.</returns>
         [HttpPost]
-        [ProducesResponseType(typeof(ArticleResponse), StatusCodes.Status201Created)]
-        [ProducesResponseType(typeof(ArticleResponse), StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<ArticleResponse>> Create([FromBody] ArticleRequest article)
+        [ProducesResponseType(typeof(ArticleResponseDto), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ArticleResponseDto), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<ArticleResponseDto>> Create([FromBody] ArticleRequestDto article)
         {
             var result = await _articleService.CreateAsync(article);
             if (result.Success)
@@ -47,9 +47,9 @@ namespace home_wiki_backend.Controllers
         /// <param name="id">The article identifier.</param>
         /// <returns>A result model containing the article response.</returns>
         [HttpGet("{id}")]
-        [ProducesResponseType(typeof(ArticleResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ArticleResponse), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ArticleResponse>> GetById(int id)
+        [ProducesResponseType(typeof(ArticleResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ArticleResponseDto), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ArticleResponseDto>> GetById(int id)
         {
             var result = await _articleService.GetByIdAsync(id);
             if (result.Success)
@@ -67,9 +67,9 @@ namespace home_wiki_backend.Controllers
         /// </remarks>
         /// <returns>A result model containing a list of article responses.</returns>
         [HttpGet]
-        [ProducesResponseType(typeof(IList<ArticleResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(IList<ArticleResponse>), StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<IList<ArticleResponse>>> GetAll()
+        [ProducesResponseType(typeof(IList<ArticleResponseDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(IList<ArticleResponseDto>), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<IList<ArticleResponseDto>>> GetAll()
         {
             // Here we call GetAsync without a predicate.
             var result = await _articleService.GetListAsync(new ArticlesWithCategoryAndTagsSpecification());
@@ -86,9 +86,9 @@ namespace home_wiki_backend.Controllers
         /// <param name="article">The article request model.</param>
         /// <returns>A result model containing the updated article response.</returns>
         [HttpPut]
-        [ProducesResponseType(typeof(ArticleResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ArticleResponse), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ArticleResponse>> Update([FromBody] ArticleRequest article)
+        [ProducesResponseType(typeof(ArticleResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ArticleResponseDto), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ArticleResponseDto>> Update([FromBody] ArticleRequestDto article)
         {
             var result = await _articleService.UpdateAsync(article);
             if (result.Success)
@@ -104,9 +104,9 @@ namespace home_wiki_backend.Controllers
         /// <param name="id">The article identifier.</param>
         /// <returns>A result model indicating the deletion result.</returns>
         [HttpDelete("{id}")]
-        [ProducesResponseType(typeof(ArticleResponse), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(ArticleResponse), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ArticleResponse>> Delete(int id)
+        [ProducesResponseType(typeof(ArticleResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ArticleResponseDto), StatusCodes.Status404NotFound)]
+        public async Task<ActionResult<ArticleResponseDto>> Delete(int id)
         {
             var result = await _articleService.DeleteAsync(id);
             if (result.Success)
@@ -122,8 +122,8 @@ namespace home_wiki_backend.Controllers
         /// <param name="article">The article request model.</param>
         /// <returns>A result model indicating the removal result.</returns>
         [HttpPost("remove")]
-        [ProducesResponseType(typeof(ArticleResponse), StatusCodes.Status200OK)]
-        public async Task<ActionResult<ArticleResponse>> Remove([FromBody] ArticleRequest article)
+        [ProducesResponseType(typeof(ArticleResponseDto), StatusCodes.Status200OK)]
+        public async Task<ActionResult<ArticleResponseDto>> Remove([FromBody] ArticleRequestDto article)
         {
             var result = await _articleService.RemoveAsync(article);
             if (result.Success)
@@ -140,9 +140,9 @@ namespace home_wiki_backend.Controllers
         /// <param name="pageSize">The page size (default is 10).</param>
         /// <returns>A result model containing a paged list of article responses.</returns>
         [HttpGet("paged")]
-        [ProducesResponseType(typeof(PagedList<ArticleResponse>), StatusCodes.Status200OK)]
-        [ProducesResponseType(typeof(PagedList<ArticleResponse>), StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult<PagedList<ArticleResponse>>> GetPaged(
+        [ProducesResponseType(typeof(PagedList<ArticleResponseDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PagedList<ArticleResponseDto>), StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<PagedList<ArticleResponseDto>>> GetPaged(
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10)
         {

@@ -17,8 +17,8 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <param name="category">The category request model.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A result model containing the created category response.</returns>
-        Task<ResultModel<CategoryResponse>> CreateAsync(
-            CategoryRequest category,
+        Task<ResultModel<CategoryResponseDto>> CreateAsync(
+            CategoryRequestDto category,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -27,7 +27,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <param name="id">The category ID.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A result model containing the category response.</returns>
-        Task<ResultModel<CategoryResponse>> GetByIdAsync(
+        Task<ResultModel<CategoryResponseDto>> GetByIdAsync(
             int id,
             CancellationToken cancellationToken = default);
 
@@ -39,10 +39,10 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A result model containing the list of category responses.
         /// </returns>
-        Task<ResultModels<CategoryResponse>> GetAsync(
-            Expression<Func<CategoryRequest, bool>>? predicate = default,
-            Func<IQueryable<CategoryRequest>,
-                IOrderedQueryable<CategoryRequest>>? orderBy = default,
+        Task<ResultModels<CategoryResponseDto>> GetAsync(
+            Expression<Func<CategoryRequestDto, bool>>? predicate = default,
+            Func<IQueryable<CategoryRequestDto>,
+                IOrderedQueryable<CategoryRequestDto>>? orderBy = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -55,11 +55,11 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A result model containing the list of paged category 
         /// responses.</returns>
-        Task<ResultModel<PagedList<CategoryResponse>>> GetPagedAsync(
+        Task<ResultModel<PagedList<CategoryResponseDto>>> GetPagedAsync(
             int pageNumber, int pageSize,
-            Expression<Func<CategoryRequest, bool>>? predicate = default,
-            Func<IQueryable<CategoryRequest>,
-                IOrderedQueryable<CategoryRequest>>? orderBy = default,
+            Expression<Func<CategoryRequestDto, bool>>? predicate = default,
+            Func<IQueryable<CategoryRequestDto>,
+                IOrderedQueryable<CategoryRequestDto>>? orderBy = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -69,8 +69,8 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A result model containing the updated category 
         /// response.</returns>
-        Task<ResultModel<CategoryResponse>> UpdateAsync(
-            CategoryRequest category,
+        Task<ResultModel<CategoryResponseDto>> UpdateAsync(
+            CategoryRequestDto category,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A result model containing the deleted category response
         /// .</returns>
-        Task<ResultModel<CategoryResponse>> DeleteAsync(
+        Task<ResultModel<CategoryResponseDto>> DeleteAsync(
             int id,
             CancellationToken cancellationToken = default);
 
@@ -91,8 +91,8 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A result model containing the removed category
         /// response.</returns>
-        Task<ResultModel<CategoryResponse>> RemoveAsync(
-            CategoryRequest category,
+        Task<ResultModel<CategoryResponseDto>> RemoveAsync(
+            CategoryRequestDto category,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -114,7 +114,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <returns>A boolean indicating whether any category 
         /// matches the predicate.</returns>
         Task<bool> AnyAsync(
-            Expression<Func<CategoryRequest, bool>>? predicate = default,
+            Expression<Func<CategoryRequestDto, bool>>? predicate = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -124,8 +124,8 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A result model containing the first matching
         /// category response.</returns>
-        Task<ResultModel<CategoryResponse>> FirstOrDefault(
-            Expression<Func<CategoryRequest, bool>>? predicate = default,
+        Task<ResultModel<CategoryResponseDto>> FirstOrDefault(
+            Expression<Func<CategoryRequestDto, bool>>? predicate = default,
             CancellationToken cancellationToken = default);
 
         /// <summary>
@@ -136,7 +136,7 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A result model containing the list of category 
         /// responses.</returns>
-        Task<ResultModels<CategoryResponse>> GetListAsync(
+        Task<ResultModels<CategoryResponseDto>> GetListAsync(
             ISpecification<Category> specification,
             CancellationToken cancellationToken = default);
     }

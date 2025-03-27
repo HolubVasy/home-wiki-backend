@@ -2,7 +2,7 @@
 
 namespace home_wiki_backend.BL.Common.Models.Requests
 {
-    public sealed class CategoryRequest : CategoryBase
+    public sealed class CategoryRequestDto : CategoryBase
     {
     }
 }

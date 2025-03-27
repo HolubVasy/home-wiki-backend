@@ -3,7 +3,7 @@ using home_wiki_backend.Shared.Models;
 
 namespace home_wiki_backend.BL.Common.Models.Requests
 {
-    public sealed class CategoryResponse : CategoryBase, IAuditable, IIdentifier
+    public sealed class TagResponseDto : TagBase, IAuditable
     {
         #region Auditable properties
 
@@ -20,5 +20,6 @@ namespace home_wiki_backend.BL.Common.Models.Requests
         public DateTime? ModifiedAt { get; set; }
 
         #endregion
+
     }
 }
