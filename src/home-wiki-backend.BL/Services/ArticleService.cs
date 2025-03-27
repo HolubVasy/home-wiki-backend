@@ -209,8 +209,7 @@ namespace home_wiki_backend.BL.Services
                 var paged = await _articleRepo.GetPagedAsync(
                     filter.PageNumber,
                     filter.PageSize,
-                    filter.GetPredicate(),
-                    filter.GetOrderBy()
+                    new ArticleForFilterSpecification(filter)
                     );
                 return GetPaged(filter.PageNumber, filter.PageSize, paged);
 
