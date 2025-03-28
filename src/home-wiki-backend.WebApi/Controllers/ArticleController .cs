@@ -240,5 +240,41 @@ namespace home_wiki_backend.Controllers
             }
             return StatusCode(result.Code, result);
         }
+
+        /// <summary>
+        /// Searches for articles by name.
+        /// </summary>
+        /// <param name="name">The partial name to search for.</param>
+        /// <param name="pageNumber">The page number to retrieve (default is 1).</param>
+        /// <param name="pageSize">The number of articles per page (default is 10).</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A result model containing a paginated list of article responses.</returns>
+        [HttpGet("search")]
+        [ProducesResponseType(typeof(ResultModel<PagedList<ArticleResponseDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResultModel<PagedList<ArticleResponseDto>>), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> SearchArticles(
+            [FromQuery] string name,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
+            CancellationToken cancellationToken = default)
+        {
+            // Create a filter request and set the name to the provided value.
+            // The remaining filter properties (categories, tags) are set to empty.
+            var filter = new ArticleFilterRequestDto(
+                pageNumber,
+                pageSize,
+                Shared.Enums.Sorting.Ascending,
+                name, // This is the partial name filter.
+                ImmutableHashSet<int>.Empty,
+                ImmutableHashSet<int>.Empty);
+
+            var result = await _articleService.GetPageAsync(filter, cancellationToken);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.Code, result);
+
+        }
     }
 }
