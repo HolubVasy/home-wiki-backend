@@ -11,6 +11,7 @@ using home_wiki_backend.Shared.Helpers;
 using home_wiki_backend.Shared.Models.Results.Errors;
 using home_wiki_backend.Shared.Models;
 using home_wiki_backend.DAL.Common.Contracts.Specifications;
+using home_wiki_backend.BL.Models;
 
 namespace home_wiki_backend.BL.Services
 {
@@ -199,6 +200,63 @@ namespace home_wiki_backend.BL.Services
                     pageSize, pred,
                     orderBy?.ConvertTo<CategoryRequestDto,
                     Category>(), cancellationToken);
+                var data = paged.Items.Select(c => new CategoryResponseDto
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    CreatedBy = c.CreatedBy,
+                    CreatedAt = c.CreatedAt,
+                    ModifiedBy = c.ModifiedBy,
+                    ModifiedAt = c.ModifiedAt
+                }).ToList();
+                return new ResultModel<PagedList<CategoryResponseDto>>
+                {
+                    Success = true,
+                    Message = "Paged categories retrieved successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = new PagedList<CategoryResponseDto>()
+                    {
+                        PageNumber = pageNumber,
+                        PageSize = pageSize,
+                        PageCount = paged.TotalItemCount,
+                        HasPreviousPage = paged.HasPreviousPage,
+                        TotalItemCount = paged.TotalItemCount,
+                        HasNextPage = paged.HasNextPage,
+                        Items = data
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving paged categories.");
+                return new ResultModel<PagedList<CategoryResponseDto>>
+                {
+                    Success = false,
+                    Message = "Error retrieving paged categories",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message,
+                    ErrorCode.Unexpected)
+                };
+            }
+        }
+        
+
+        /// <inheritdoc/>
+        public async Task<ResultModel<PagedList<CategoryResponseDto>>>
+            GetPagedAsync(
+            int pageNumber,
+            int pageSize,
+            CategoryFilterRequestDto filterSpecification,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                _logger.LogInformation("Fetching paged categories. " +
+                    "Page: {PageNumber}, Size: {PageSize}",
+                    pageNumber, pageSize);
+                var paged = await _catRepo.GetPagedAsync(pageNumber,
+                    pageSize, new CategoryForFilterSpecification(filterSpecification), 
+                    cancellationToken);
                 var data = paged.Items.Select(c => new CategoryResponseDto
                 {
                     Id = c.Id,

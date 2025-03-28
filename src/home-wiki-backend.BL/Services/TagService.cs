@@ -11,6 +11,7 @@ using home_wiki_backend.Shared.Helpers;
 using home_wiki_backend.Shared.Models.Results.Errors;
 using home_wiki_backend.Shared.Models;
 using home_wiki_backend.DAL.Common.Contracts.Specifications;
+using home_wiki_backend.BL.Models;
 
 namespace home_wiki_backend.BL.Services
 {
@@ -192,6 +193,60 @@ namespace home_wiki_backend.BL.Services
                 var paged = await _tagRepo.GetPagedAsync(pageNumber,
                     pageSize, pred,
                     orderBy?.ConvertTo<TagRequestDto, Tag>(), cancellationToken);
+                var data = paged.Items.Select(t => new TagResponseDto
+                {
+                    Id = t.Id,
+                    Name = t.Name,
+                    CreatedBy = t.CreatedBy,
+                    CreatedAt = t.CreatedAt,
+                    ModifiedBy = t.ModifiedBy,
+                    ModifiedAt = t.ModifiedAt
+                }).ToList();
+                return new ResultModel<PagedList<TagResponseDto>>
+                {
+                    Success = true,
+                    Message = "Paged tags retrieved successfully",
+                    Code = StatusCodes.Status200OK,
+                    Data = new PagedList<TagResponseDto>()
+                    {
+                        PageNumber = pageNumber,
+                        PageSize = pageSize,
+                        PageCount = paged.PageCount,
+                        HasNextPage = paged.HasNextPage,
+                        HasPreviousPage = paged.HasPreviousPage,
+                        TotalItemCount = paged.TotalItemCount,
+                        Items = data,
+                    }
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving paged tags.");
+                return new ResultModel<PagedList<TagResponseDto>>
+                {
+                    Success = false,
+                    Message = "Error retrieving paged tags",
+                    Code = StatusCodes.Status500InternalServerError,
+                    Error = new ErrorResultModel(ex.Message,
+                    ErrorCode.Unexpected)
+                };
+            }
+        }
+
+        /// <inheritdoc/>
+        public async Task<ResultModel<PagedList<TagResponseDto>>> GetPagedAsync(
+            int pageNumber,
+            int pageSize,
+           TagFilterRequestDto tagFilterRequestDto,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                _logger.LogInformation("Fetching paged tags. Page: " +
+                    "{PageNumber}, Size: {PageSize}",
+                    pageNumber, pageSize);
+                var paged = await _tagRepo.GetPagedAsync(pageNumber,
+                    pageSize, new TagForFilterSpecification(tagFilterRequestDto));
                 var data = paged.Items.Select(t => new TagResponseDto
                 {
                     Id = t.Id,

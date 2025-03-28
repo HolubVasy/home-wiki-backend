@@ -4,6 +4,9 @@ using home_wiki_backend.BL.Common.Models.Requests;
 using home_wiki_backend.Shared.Models;
 using home_wiki_backend.BL.Common.Models.Responses;
 using home_wiki_backend.DAL.Specifications;
+using home_wiki_backend.BL.Models;
+using home_wiki_backend.Shared.Models.Results.Generic;
+using System.Collections.Immutable;
 
 namespace home_wiki_backend.Controllers
 {
@@ -155,6 +158,87 @@ namespace home_wiki_backend.Controllers
                 return Ok(result.Data);
             }
             return StatusCode(result.Code, result.Data);
+        }
+
+        /// <summary>
+        /// Retrieves paginated articles by category ID.
+        /// </summary>
+        /// <param name="categoryId">The category ID to filter articles by.</param>
+        /// <param name="pageNumber">The page number to retrieve.</param>
+        /// <param name="pageSize">The number of articles per page.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A result model containing a paginated list of article responses.</returns>
+        [HttpGet("category/{categoryId}")]
+        [ProducesResponseType(typeof(ResultModel<PagedList<ArticleResponseDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResultModel<PagedList<ArticleResponseDto>>), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetArticlesByCategory(
+            int categoryId,
+            int pageNumber = 1,
+            int pageSize = 10,
+            CancellationToken cancellationToken = default)
+        {
+            var filter = new ArticleFilterRequestDto(pageNumber, pageSize,
+                Shared.Enums.Sorting.Ascending, string.Empty,
+                new HashSet<int>() { categoryId }.ToImmutableHashSet(),
+                ImmutableHashSet<int>.Empty);
+
+            var result = await _articleService.GetPageAsync(filter, cancellationToken);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.Code, result);
+        }
+
+        /// <summary>
+        /// Retrieves paginated articles by tag ID.
+        /// </summary>
+        /// <param name="tagId">The tag ID to filter articles by.</param>
+        /// <param name="pageNumber">The page number to retrieve.</param>
+        /// <param name="pageSize">The number of articles per page.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A result model containing a paginated list of article responses.</returns>
+        [HttpGet("tag/{tagId}")]
+        [ProducesResponseType(typeof(ResultModel<PagedList<ArticleResponseDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResultModel<PagedList<ArticleResponseDto>>), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetArticlesByTag(
+            int tagId,
+            int pageNumber = 1,
+            int pageSize = 10,
+            CancellationToken cancellationToken = default)
+        {
+            var filter = new ArticleFilterRequestDto(pageNumber, pageSize,
+                Shared.Enums.Sorting.Ascending, string.Empty,
+                ImmutableHashSet<int>.Empty,
+                new HashSet<int>() { tagId }.ToImmutableHashSet());
+
+            var result = await _articleService.GetPageAsync(filter, cancellationToken);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.Code, result);
+        }
+
+        /// <summary>
+        /// Retrieves paginated articles based on the provided filter.
+        /// </summary>
+        /// <param name="filter">The article request filter model.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>A result model containing a paginated list of article responses.</returns>
+        [HttpPost("filter")]
+        [ProducesResponseType(typeof(ResultModel<PagedList<ArticleResponseDto>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ResultModel<PagedList<ArticleResponseDto>>), StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetArticlesByFilter(
+            [FromBody] ArticleFilterRequestDto filter,
+            CancellationToken cancellationToken = default)
+        {
+            var result = await _articleService.GetPageAsync(filter, cancellationToken);
+            if (result.Success)
+            {
+                return Ok(result);
+            }
+            return StatusCode(result.Code, result);
         }
     }
 }

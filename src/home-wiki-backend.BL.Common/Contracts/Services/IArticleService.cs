@@ -1,5 +1,6 @@
 ﻿using home_wiki_backend.BL.Common.Models.Requests;
 using home_wiki_backend.BL.Common.Models.Responses;
+using home_wiki_backend.BL.Models;
 using home_wiki_backend.DAL.Common.Contracts.Specifications;
 using home_wiki_backend.DAL.Common.Models.Entities;
 using home_wiki_backend.Shared.Models;
@@ -168,5 +169,6 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
             int pageNumber, int pageSize,
             ISpecification<Article> specification,
             CancellationToken cancellationToken = default);
+        Task<ResultModel<PagedList<ArticleResponseDto>>> GetPageAsync(ArticleFilterRequestDto filter, CancellationToken cancellationToken = default);
     }
 }

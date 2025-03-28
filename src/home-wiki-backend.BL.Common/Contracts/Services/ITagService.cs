@@ -4,6 +4,7 @@ using home_wiki_backend.Shared.Models.Results.Generic;
 using home_wiki_backend.DAL.Common.Models.Entities;
 using home_wiki_backend.Shared.Models;
 using home_wiki_backend.DAL.Common.Contracts.Specifications;
+using home_wiki_backend.BL.Models;
 
 namespace home_wiki_backend.BL.Common.Contracts.Services
 {
@@ -140,5 +141,6 @@ namespace home_wiki_backend.BL.Common.Contracts.Services
         Task<ResultModels<TagResponseDto>> GetListAsync(
             ISpecification<Tag> specification,
             CancellationToken cancellationToken = default);
+        Task<ResultModel<PagedList<TagResponseDto>>> GetPagedAsync(int pageNumber, int pageSize, TagFilterRequestDto tagFilterRequestDto, CancellationToken cancellationToken = default);
     }
 }

@@ -3,13 +3,8 @@ using System.Collections.Immutable;
 
 namespace home_wiki_backend.BL.Models
 {
-    public sealed class ArticleFilterRequestDto
+    public sealed class ArticleFilterRequestDto : FilterRequestDtoBase
     {
-        public int PageNumber { get; }
-        public int PageSize { get; }
-        public string PartName { get; }
-        public Sorting Sorting { get; } = Sorting.None;
-
         public ImmutableHashSet<int> CategoryIds { get; } = ImmutableHashSet<int>.Empty;
         public IImmutableSet<int> TagIds { get; } = ImmutableHashSet<int>.Empty;
 
@@ -19,12 +14,10 @@ namespace home_wiki_backend.BL.Models
             Sorting sorting,
             string partName,
             ImmutableHashSet<int> categoryIds,
-            ImmutableHashSet<int> tagIds)
+            ImmutableHashSet<int> tagIds) : base(pageNumber, pageSize, sorting, partName) 
         {
-            PageNumber = pageNumber;
-            PageSize = pageSize;
-            Sorting = sorting;
-            PartName = partName;
+            CategoryIds = categoryIds;
+            TagIds = tagIds;
             CategoryIds = categoryIds;
             TagIds = tagIds;
         }
@@ -32,7 +25,7 @@ namespace home_wiki_backend.BL.Models
         public ArticleFilterRequestDto(
             int pageNumber,
             int pageSize,
-            string partName)
+            string partName) : base(pageNumber, pageSize, partName)
         {
             PageNumber = pageNumber;
             PageSize = pageSize;
@@ -41,11 +34,8 @@ namespace home_wiki_backend.BL.Models
 
         public ArticleFilterRequestDto(
             int pageNumber,
-            int pageSize)
+            int pageSize) : base(pageNumber, pageSize)
         {
-            PageNumber = pageNumber;
-            PageSize = pageSize;
-            PartName = string.Empty;
         }
 
     }
