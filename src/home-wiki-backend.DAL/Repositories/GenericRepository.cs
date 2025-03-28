@@ -315,17 +315,18 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
         {
             await using var newContext = new DbWikiContext(_context.Options);
             var newDbSet = newContext.Set<TEntity>();
-            var query = newDbSet.AsNoTracking();
+            var newQuery = newDbSet.AsNoTracking();
             if (predicate is not null)
             {
-                query = query.Where(predicate);
+                newQuery = newQuery.Where(predicate);
             }
             if (orderBy is not null)
             {
-                query = orderBy(query);
+                newQuery = orderBy(newQuery);
             }
 
-            var totalItemCountTask = query.CountAsync(cancellationToken);
+            var totalItemCountTask = newQuery.CountAsync(cancellationToken);
+            var query = _dbSet.AsNoTracking();
             var elementsTask = query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
@@ -366,9 +367,11 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
         {
             await using var newContext = new DbWikiContext(_context.Options);
             var newDbSet = newContext.Set<TEntity>();
-            var query = GetQuery(newDbSet, specification);
+            var queryNew = GetQuery(newDbSet, specification);
 
-            var totalItemCountTask = query.CountAsync(cancellationToken);
+            var totalItemCountTask = queryNew.CountAsync(cancellationToken);
+
+            var query = GetQuery(_dbSet, specification);
             var elementsTask = query
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
