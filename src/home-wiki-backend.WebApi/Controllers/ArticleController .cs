@@ -164,6 +164,7 @@ namespace home_wiki_backend.Controllers
         /// Retrieves paginated articles by category ID.
         /// </summary>
         /// <param name="categoryId">The category ID to filter articles by.</param>
+        /// <param name="name">The partial name to search for.</param>
         /// <param name="pageNumber">The page number to retrieve.</param>
         /// <param name="pageSize">The number of articles per page.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -172,28 +173,30 @@ namespace home_wiki_backend.Controllers
         [ProducesResponseType(typeof(ResultModel<PagedList<ArticleResponseDto>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResultModel<PagedList<ArticleResponseDto>>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetArticlesByCategory(
-            int categoryId,
-            int pageNumber = 1,
-            int pageSize = 10,
+            [FromRoute] int categoryId,
+            [FromQuery] string? name,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
             CancellationToken cancellationToken = default)
         {
             var filter = new ArticleFilterRequestDto(pageNumber, pageSize,
-                Shared.Enums.Sorting.Ascending, string.Empty,
+                Shared.Enums.Sorting.Ascending, name!,
                 new HashSet<int>() { categoryId }.ToImmutableHashSet(),
                 ImmutableHashSet<int>.Empty);
 
             var result = await _articleService.GetPageAsync(filter, cancellationToken);
             if (result.Success)
             {
-                return Ok(result);
+                return Ok(result.Data);
             }
-            return StatusCode(result.Code, result);
+            return StatusCode(result.Code, result.Data);
         }
 
         /// <summary>
         /// Retrieves paginated articles by tag ID.
         /// </summary>
         /// <param name="tagId">The tag ID to filter articles by.</param>
+        /// <param name="name">The partial name to search for.</param>
         /// <param name="pageNumber">The page number to retrieve.</param>
         /// <param name="pageSize">The number of articles per page.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
@@ -202,13 +205,14 @@ namespace home_wiki_backend.Controllers
         [ProducesResponseType(typeof(ResultModel<PagedList<ArticleResponseDto>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResultModel<PagedList<ArticleResponseDto>>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetArticlesByTag(
-            int tagId,
-            int pageNumber = 1,
-            int pageSize = 10,
+            [FromRoute] int tagId,
+            [FromQuery] string? name,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10,
             CancellationToken cancellationToken = default)
         {
             var filter = new ArticleFilterRequestDto(pageNumber, pageSize,
-                Shared.Enums.Sorting.Ascending, string.Empty,
+                Shared.Enums.Sorting.Ascending, name!,
                 ImmutableHashSet<int>.Empty,
                 new HashSet<int>() { tagId }.ToImmutableHashSet());
 

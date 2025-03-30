@@ -205,7 +205,6 @@ namespace home_wiki_backend.BL.Services
             try
             {
                 Log(filter);
-                var predicate = filter.GetPredicate();
                 var paged = await _articleRepo.GetPagedAsync(
                     filter.PageNumber,
                     filter.PageSize,

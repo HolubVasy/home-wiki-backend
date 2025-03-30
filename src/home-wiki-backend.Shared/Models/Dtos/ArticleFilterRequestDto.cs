@@ -20,6 +20,7 @@ namespace home_wiki_backend.BL.Models
             TagIds = tagIds;
             CategoryIds = categoryIds;
             TagIds = tagIds;
+            PartName = partName;
         }
 
         public ArticleFilterRequestDto(
