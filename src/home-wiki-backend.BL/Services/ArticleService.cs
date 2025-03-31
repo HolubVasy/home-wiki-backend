@@ -600,6 +600,7 @@ namespace home_wiki_backend.BL.Services
                     Description = article.Description,
                     Category = new CategoryResponseDto
                     {
+                        Id = article.Category.Id,
                         Name = article.Category.Name,
                         CreatedAt = article.Category.CreatedAt,
                         CreatedBy = article.Category.CreatedBy,
