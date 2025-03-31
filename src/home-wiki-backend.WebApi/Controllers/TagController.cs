@@ -159,7 +159,8 @@ namespace home_wiki_backend.Controllers
                 Shared.Enums.Sorting.Ascending,
                 name!);
 
-            var result = await _tagService.GetPagedAsync(pageNumber, pageSize, filter, cancellationToken);
+            var result = await _tagService.GetPagedAsync(
+                pageNumber, pageSize, filter, cancellationToken);
             if (result.Success)
             {
                 return Ok(result.Data);

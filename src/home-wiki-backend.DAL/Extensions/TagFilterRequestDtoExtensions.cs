@@ -18,8 +18,7 @@ namespace home_wiki_backend.BL.Extensions
                 var partName = filter.PartName;
                 predicate = predicate
                     .AndAlso(
-                        a => a.Name.Contains(partName,
-                            StringComparison.OrdinalIgnoreCase));
+                        a => a.Name.ToLower().Contains(partName.ToLower()));
 
             }
 
