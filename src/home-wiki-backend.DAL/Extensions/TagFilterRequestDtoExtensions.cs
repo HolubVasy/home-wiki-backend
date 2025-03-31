@@ -1,14 +1,14 @@
-﻿using home_wiki_backend.BL.Models;
-using home_wiki_backend.DAL.Common.Models.Entities;
+﻿using home_wiki_backend.DAL.Common.Models.Entities;
 using home_wiki_backend.Shared.Enums;
 using home_wiki_backend.Shared.Helpers;
+using home_wiki_backend.Shared.Models.Dtos;
 using System.Linq.Expressions;
 
-namespace home_wiki_backend.BL.Extensions
+namespace home_wiki_backend.DAL.Extensions
 {
     public static class TagFilterRequestDtoExtensions
     {
-        public static Expression<Func<Tag, bool>> 
+        public static Expression<Func<Tag, bool>>
             GetPredicate(this TagFilterRequestDto filter)
         {
             Expression<Func<Tag, bool>> predicate = a => true;
@@ -25,7 +25,7 @@ namespace home_wiki_backend.BL.Extensions
             return predicate;
         }
 
-        public static Func<IQueryable<Tag>, IOrderedQueryable<Tag>>? 
+        public static Func<IQueryable<Tag>, IOrderedQueryable<Tag>>?
             GetOrderBy(this
             TagFilterRequestDto filter) => filter.Sorting switch
             {

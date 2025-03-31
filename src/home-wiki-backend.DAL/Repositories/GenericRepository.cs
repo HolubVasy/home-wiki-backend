@@ -1,9 +1,9 @@
 ﻿using System.Linq.Expressions;
 using home_wiki_backend.DAL.Common.Contracts;
 using home_wiki_backend.DAL.Common.Contracts.Specifications;
-using home_wiki_backend.DAL.Data;
+using home_wiki_backend.DAL.Common.Data;
+using home_wiki_backend.DAL.Common.Helpers.Specifications;
 using home_wiki_backend.DAL.Exceptions;
-using home_wiki_backend.DAL.Specifications.Common;
 using home_wiki_backend.Shared.Contracts;
 using home_wiki_backend.Shared.Models;
 using Microsoft.EntityFrameworkCore;
@@ -13,12 +13,11 @@ namespace home_wiki_backend.DAL.Repositories;
 public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity> 
     where TEntity : class, IIdentifier, IName
 {
-    private readonly DbWikiContext _context;
     private readonly DbSet<TEntity> _dbSet;
 
     public GenericRepository(DbWikiContext context)
     {
-        _context = context;
+        DbContext = context;
         _dbSet = context.Set<TEntity>();
     }
 
@@ -87,7 +86,7 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
     {
         try
         {
-            await using var newContext = new DbWikiContext(_context.Options);
+            await using var newContext = new DbWikiContext(DbContext.Options);
             var newDbSet = newContext.Set<TEntity>();
             var query = GetQuery(newDbSet, specification);
 
@@ -109,7 +108,7 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
     {
         try
         {
-            await using var newContext = new DbWikiContext(_context.Options);
+            await using var newContext = new DbWikiContext(DbContext.Options);
             var newDbSet = newContext.Set<TEntity>();
             return await newDbSet
                 .AsNoTracking()
@@ -155,12 +154,12 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
         try
         {
             _dbSet.Add(entity);
-            await _context
+            await DbContext
                 .SaveChangesAsync(cancellationToken)
                 .ConfigureAwait(false);
 
             // Detach the entity after saving changes
-            _context.Entry(entity).State = EntityState.Detached;
+            DbContext.Entry(entity).State = EntityState.Detached;
 
             return entity;
         }
@@ -184,10 +183,10 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
                     $"not found in the database.");
             }
 
-            _context.Entry(beforeUpdate).State = EntityState.Detached;
-            _context.Entry(entity).State = EntityState.Modified;
+            DbContext.Entry(beforeUpdate).State = EntityState.Detached;
+            DbContext.Entry(entity).State = EntityState.Modified;
             _dbSet.Update(entity);
-            await _context.SaveChangesAsync(cancellationToken)
+            await DbContext.SaveChangesAsync(cancellationToken)
                 .ConfigureAwait(false);
         }
         catch (Exception ex)
@@ -218,7 +217,7 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
     /// <inheritdoc/>
     public IQueryable<TEntity> GetQueryable()
     {
-        return _dbSet.AsNoTracking();
+        return _dbSet;
     }
 
     /// <inheritdoc/>
@@ -227,7 +226,7 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
     {
         try
         {
-            await using var newContext = new DbWikiContext(_context.Options);
+            await using var newContext = new DbWikiContext(DbContext.Options);
             var newDbSet = newContext.Set<TEntity>();
             var query = newDbSet
                 .AsNoTracking()
@@ -252,7 +251,7 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
     {
         try
         {
-            await using var newContext = new DbWikiContext(_context.Options);
+            await using var newContext = new DbWikiContext(DbContext.Options);
             var newDbSet = newContext.Set<TEntity>();
             var query = newDbSet
                 .AsNoTracking()
@@ -280,7 +279,7 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
     {
         try
         {
-            await using var newContext = new DbWikiContext(_context.Options);
+            await using var newContext = new DbWikiContext(DbContext.Options);
             var newDbSet = newContext.Set<TEntity>();
             var query = newDbSet.AsNoTracking();
 
@@ -313,7 +312,7 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
     {
         try
         {
-            await using var newContext = new DbWikiContext(_context.Options);
+            await using var newContext = new DbWikiContext(DbContext.Options);
             var newDbSet = newContext.Set<TEntity>();
             var newQuery = newDbSet.AsNoTracking();
             if (predicate is not null)
@@ -365,7 +364,7 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
     {
         try
         {
-            await using var newContext = new DbWikiContext(_context.Options);
+            await using var newContext = new DbWikiContext(DbContext.Options);
             var newDbSet = newContext.Set<TEntity>();
             var queryNew = GetQuery(newDbSet, specification);
 
@@ -444,16 +443,19 @@ public sealed class GenericRepository<TEntity> : IGenericRepository<TEntity>
         }
     }
 
+
+    public DbWikiContext DbContext { get; }
+
     private async Task RemoveEntityAsync(TEntity? entity,
        CancellationToken cancellationToken = default)
     {
         try
         {
-            if (entity is not null && _context.Entry(entity).State == EntityState.Detached)
+            if (entity is not null && DbContext.Entry(entity).State == EntityState.Detached)
             {
                 _dbSet.Attach(entity);
                 _dbSet.Remove(entity);
-                await _context.SaveChangesAsync(cancellationToken)
+                await DbContext.SaveChangesAsync(cancellationToken)
                     .ConfigureAwait(false);
             }
         }

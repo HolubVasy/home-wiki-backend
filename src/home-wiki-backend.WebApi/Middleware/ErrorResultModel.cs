@@ -1,6 +1,6 @@
 ﻿using home_wiki_backend.Shared.Enums;
 
-namespace Andersen.Infrastructure.API
+namespace home_wiki_backend.Middleware
 {
     /// <summary>
     /// Represents the model for error results.

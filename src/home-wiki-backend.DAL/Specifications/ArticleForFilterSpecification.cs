@@ -1,7 +1,7 @@
-﻿using home_wiki_backend.BL.Extensions;
-using home_wiki_backend.BL.Models;
-using home_wiki_backend.DAL.Common.Contracts.Specifications;
+﻿using home_wiki_backend.DAL.Common.Contracts.Specifications;
 using home_wiki_backend.DAL.Common.Models.Entities;
+using home_wiki_backend.DAL.Extensions;
+using home_wiki_backend.Shared.Models.Dtos;
 
 /// <summary>
 /// Specification for retrieving articles by category.

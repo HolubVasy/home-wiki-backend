@@ -1,4 +1,5 @@
 ﻿using home_wiki_backend.DAL.Common.Contracts.Specifications;
+using home_wiki_backend.DAL.Common.Data;
 using home_wiki_backend.Shared.Contracts;
 using home_wiki_backend.Shared.Models;
 using System.Linq.Expressions;
@@ -7,6 +8,8 @@ namespace home_wiki_backend.DAL.Common.Contracts
 {
     public interface IGenericRepository<TEntity> where TEntity : class, IIdentifier, IName
     {
+        DbWikiContext DbContext { get; }
+
         /// <summary>
         /// Asynchronously gets a collection of entities that satisfy the specified
         /// predicate.

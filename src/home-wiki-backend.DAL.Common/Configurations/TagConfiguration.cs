@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using home_wiki_backend.DAL.Common.Models.Entities;
 using home_wiki_backend.DAL.Common.Resources;
 
-namespace home_wiki_backend.DAL.Configurations;
+namespace home_wiki_backend.DAL.Common.Configurations;
 
 public class TagConfiguration : IEntityTypeConfiguration<Tag>
 {

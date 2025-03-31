@@ -1,6 +1,7 @@
 ﻿using home_wiki_backend.Shared.Enums;
+using home_wiki_backend.Shared.Models.Dtos.Common;
 
-namespace home_wiki_backend.BL.Models
+namespace home_wiki_backend.Shared.Models.Dtos
 {
     public sealed class TagFilterRequestDto : FilterRequestDtoBase
     {
@@ -8,7 +9,7 @@ namespace home_wiki_backend.BL.Models
             int pageNumber,
             int pageSize,
             Sorting sorting,
-            string partName) : base(pageNumber, pageSize, sorting, partName) 
+            string partName) : base(pageNumber, pageSize, sorting, partName)
         {
         }
 

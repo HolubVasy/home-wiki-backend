@@ -1,7 +1,7 @@
 ﻿using home_wiki_backend.DAL.Common.Contracts.Specifications;
 using Microsoft.EntityFrameworkCore;
 
-namespace home_wiki_backend.DAL.Specifications.Common;
+namespace home_wiki_backend.DAL.Common.Helpers.Specifications;
 
 public static class SpecificationEvaluator<T> where T : class
 {

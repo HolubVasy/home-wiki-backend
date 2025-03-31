@@ -1,7 +1,8 @@
 ﻿using home_wiki_backend.Shared.Enums;
+using home_wiki_backend.Shared.Models.Dtos.Common;
 using System.Collections.Immutable;
 
-namespace home_wiki_backend.BL.Models
+namespace home_wiki_backend.Shared.Models.Dtos
 {
     public sealed class ArticleFilterRequestDto : FilterRequestDtoBase
     {
@@ -14,7 +15,7 @@ namespace home_wiki_backend.BL.Models
             Sorting sorting,
             string partName,
             ImmutableHashSet<int> categoryIds,
-            ImmutableHashSet<int> tagIds) : base(pageNumber, pageSize, sorting, partName) 
+            ImmutableHashSet<int> tagIds) : base(pageNumber, pageSize, sorting, partName)
         {
             CategoryIds = categoryIds;
             TagIds = tagIds;

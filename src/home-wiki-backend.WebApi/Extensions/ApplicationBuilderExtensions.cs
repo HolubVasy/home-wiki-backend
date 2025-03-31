@@ -1,5 +1,5 @@
 ﻿using home_wiki_backend.Contracts;
-using home_wiki_backend.DAL.Data;
+using home_wiki_backend.DAL.Common.Data;
 using Microsoft.EntityFrameworkCore;
 
 

@@ -10,12 +10,12 @@ using home_wiki_backend.Shared.Models.Results.Generic;
 using home_wiki_backend.Shared.Enums;
 using home_wiki_backend.Shared.Helpers;
 using home_wiki_backend.Shared.Models.Results.Errors;
-using home_wiki_backend.BL.Models;
-using home_wiki_backend.BL.Extensions;
 using home_wiki_backend.Shared.Extensions;
 using home_wiki_backend.BL.Common.Models.Responses;
 using home_wiki_backend.DAL.Common.Contracts.Specifications;
 using home_wiki_backend.DAL.Specifications;
+using Microsoft.EntityFrameworkCore;
+using home_wiki_backend.Shared.Models.Dtos;
 
 namespace home_wiki_backend.BL.Services
 {
@@ -256,6 +256,10 @@ namespace home_wiki_backend.BL.Services
         {
             try
             {
+                if (article is null)
+                {
+                    throw new ArgumentNullException("Article can not be null for update.");
+                }
                 _logger.LogInformation("Updating article ID: {Id}", article.Id);
                 var existing = await _articleRepo.FirstOrDefaultAsync(
                     a => a.Id == article.Id, cancellationToken);
@@ -285,7 +289,18 @@ namespace home_wiki_backend.BL.Services
                     ModifiedBy = article.ModifiedBy,
                     ModifiedAt = DateTime.UtcNow
                 };
-                await _articleRepo.UpdateAsync(updated, cancellationToken);
+
+                var existingArticle = await _articleRepo.GetQueryable()
+                        .Include(a => a.Tags)
+                        .FirstAsync(a => a.Id == article.Id, cancellationToken);
+                _articleRepo.DbContext!.Entry(existingArticle).CurrentValues.SetValues(updated);
+
+                var newTagIds = article?.TagIds?.ToList() ?? [];
+                RemoveNotPresented(existingArticle, newTagIds);
+                AddNew(existingArticle, newTagIds);
+
+                await _articleRepo.DbContext.SaveChangesAsync(cancellationToken);
+
                 return new ResultModel<ArticleResponseDto>
                 {
                     Success = true,
@@ -296,7 +311,7 @@ namespace home_wiki_backend.BL.Services
                         Id = updated.Id,
                         Name = updated.Name,
                         Description = updated.Description,
-                        Category = updated.Category,
+                        Category = new Category() { Id = article!.CategoryId },
                         Tags = updated.Tags?.Cast<TagBase>()?.ToHashSet(),
                         CreatedBy = updated.CreatedBy,
                         CreatedAt = updated.CreatedAt,
@@ -315,6 +330,27 @@ namespace home_wiki_backend.BL.Services
                     Code = StatusCodes.Status500InternalServerError,
                     Error = new ErrorResultModel(ex.Message, ErrorCode.Unexpected)
                 };
+            }
+        }
+
+        private void AddNew(Article? existingArticle, List<int> newTagIds)
+        {
+            var currentTagIds = existingArticle?.Tags?.Select(t => t.Id) ?? [];
+            var adding = _articleRepo.DbContext.Tags
+                .Where(t => newTagIds.Except(currentTagIds).Contains(t.Id));
+            foreach (var item in adding)
+            {
+                existingArticle?.Tags?.Add(item);
+            }
+        }
+
+        private static void RemoveNotPresented(Article? existingArticle, List<int> newTagIds)
+        {
+            var removing = existingArticle?.Tags?
+                                .Where(t => !newTagIds.Contains(t.Id)) ?? [];
+            foreach (var item in removing)
+            {
+                existingArticle?.Tags?.Remove(item);
             }
         }
 

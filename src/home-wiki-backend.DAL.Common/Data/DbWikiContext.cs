@@ -1,9 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using home_wiki_backend.DAL.Common.Models.Entities;
-using home_wiki_backend.DAL.Configurations;
-using HomeWiki.DAL.EntitiesConfiguration;
+using home_wiki_backend.DAL.Common.Configurations;
 
-namespace home_wiki_backend.DAL.Data;
+namespace home_wiki_backend.DAL.Common.Data;
 
 public sealed class DbWikiContext : DbContext
 {

@@ -1,4 +1,4 @@
-using home_wiki_backend.DAL.Data;
+using home_wiki_backend.DAL.Common.Data;
 using home_wiki_backend.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
