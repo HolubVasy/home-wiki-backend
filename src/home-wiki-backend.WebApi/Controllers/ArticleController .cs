@@ -257,7 +257,7 @@ namespace home_wiki_backend.Controllers
         [ProducesResponseType(typeof(ResultModel<PagedList<ArticleResponseDto>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResultModel<PagedList<ArticleResponseDto>>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> SearchArticles(
-            [FromQuery] string name,
+            [FromQuery] string? name,
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10,
             CancellationToken cancellationToken = default)
@@ -268,7 +268,7 @@ namespace home_wiki_backend.Controllers
                 pageNumber,
                 pageSize,
                 Shared.Enums.Sorting.Ascending,
-                name, // This is the partial name filter.
+                name!, // This is the partial name filter.
                 ImmutableHashSet<int>.Empty,
                 ImmutableHashSet<int>.Empty);
 
