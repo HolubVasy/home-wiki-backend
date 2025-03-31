@@ -219,9 +219,9 @@ namespace home_wiki_backend.Controllers
             var result = await _articleService.GetPageAsync(filter, cancellationToken);
             if (result.Success)
             {
-                return Ok(result);
+                return Ok(result.Data);
             }
-            return StatusCode(result.Code, result);
+            return StatusCode(result.Code, result.Data);
         }
 
         /// <summary>
@@ -240,9 +240,9 @@ namespace home_wiki_backend.Controllers
             var result = await _articleService.GetPageAsync(filter, cancellationToken);
             if (result.Success)
             {
-                return Ok(result);
+                return Ok(result.Data);
             }
-            return StatusCode(result.Code, result);
+            return StatusCode(result.Code, result.Data);
         }
 
         /// <summary>
@@ -275,9 +275,9 @@ namespace home_wiki_backend.Controllers
             var result = await _articleService.GetPageAsync(filter, cancellationToken);
             if (result.Success)
             {
-                return Ok(result);
+                return Ok(result.Data);
             }
-            return StatusCode(result.Code, result);
+            return StatusCode(result.Code, result.Data);
 
         }
     }

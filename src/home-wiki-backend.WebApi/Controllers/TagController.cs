@@ -146,7 +146,7 @@ namespace home_wiki_backend.Controllers
         [ProducesResponseType(typeof(ResultModel<PagedList<ArticleResponseDto>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResultModel<PagedList<ArticleResponseDto>>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> SearchTags(
-            [FromQuery] string name,
+            [FromQuery] string? name,
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10,
             CancellationToken cancellationToken = default)
@@ -157,14 +157,14 @@ namespace home_wiki_backend.Controllers
             pageNumber,
             pageSize,
                 Shared.Enums.Sorting.Ascending,
-                name);
+                name!);
 
             var result = await _tagService.GetPagedAsync(pageNumber, pageSize, filter, cancellationToken);
             if (result.Success)
             {
-                return Ok(result);
+                return Ok(result.Data);
             }
-            return StatusCode(result.Code, result);
+            return StatusCode(result.Code, result.Data);
 
         }
     }

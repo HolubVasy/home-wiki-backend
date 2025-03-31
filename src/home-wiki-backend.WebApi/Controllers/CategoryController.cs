@@ -147,7 +147,7 @@ namespace home_wiki_backend.Controllers
         [ProducesResponseType(typeof(ResultModel<PagedList<CategoryResponseDto>>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ResultModel<PagedList<CategoryResponseDto>>), StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> SearchCategories(
-            [FromQuery] string name,
+            [FromQuery] string? name,
             [FromQuery] int pageNumber = 1,
             [FromQuery] int pageSize = 10,
             CancellationToken cancellationToken = default)
@@ -157,7 +157,7 @@ namespace home_wiki_backend.Controllers
                 pageNumber,
                 pageSize,
                 Shared.Enums.Sorting.Ascending,
-                name);
+                name!);
 
             var result = await _categoryService.GetPagedAsync(pageNumber,
                                                              pageSize,
@@ -165,9 +165,9 @@ namespace home_wiki_backend.Controllers
                                                              cancellationToken);
             if (result.Success)
             {
-                return Ok(result);
+                return Ok(result.Data);
             }
-            return StatusCode(result.Code, result);
+            return StatusCode(result.Code, result.Data);
 
         }
     }
