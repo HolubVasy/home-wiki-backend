@@ -275,7 +275,7 @@ namespace home_wiki_backend.BL.Services
                     {
                         PageNumber = pageNumber,
                         PageSize = pageSize,
-                        PageCount = paged.TotalItemCount,
+                        PageCount = paged.PageCount,
                         HasPreviousPage = paged.HasPreviousPage,
                         TotalItemCount = paged.TotalItemCount,
                         HasNextPage = paged.HasNextPage,
