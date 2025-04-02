@@ -10,7 +10,7 @@ namespace home_wiki_backend.Shared.Models.Dtos.Common
         public string PartName { get; protected set; }
         public Sorting Sorting { get; protected set; } = Sorting.None;
 
-
+      
         protected FilterRequestDtoBase(
             int pageNumber,
             int pageSize,
@@ -39,6 +39,14 @@ namespace home_wiki_backend.Shared.Models.Dtos.Common
         {
             PageNumber = pageNumber;
             PageSize = pageSize;
+            PartName = string.Empty;
+        }
+
+        protected FilterRequestDtoBase()
+        {
+            PageNumber = 1;
+            PageSize = 10;
+            Sorting = Sorting.Ascending;
             PartName = string.Empty;
         }
 

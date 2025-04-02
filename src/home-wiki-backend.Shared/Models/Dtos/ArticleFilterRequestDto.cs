@@ -1,14 +1,16 @@
 ﻿using home_wiki_backend.Shared.Enums;
 using home_wiki_backend.Shared.Models.Dtos.Common;
 using System.Collections.Immutable;
+using System.Text.Json.Serialization;
 
 namespace home_wiki_backend.Shared.Models.Dtos
 {
     public sealed class ArticleFilterRequestDto : FilterRequestDtoBase
     {
-        public ImmutableHashSet<int> CategoryIds { get; } = ImmutableHashSet<int>.Empty;
-        public IImmutableSet<int> TagIds { get; } = ImmutableHashSet<int>.Empty;
+        public ImmutableHashSet<int> CategoryIds { get; init; } = ImmutableHashSet<int>.Empty;
+        public ImmutableHashSet<int> TagIds { get; init; } = ImmutableHashSet<int>.Empty;
 
+        [JsonConstructor]
         public ArticleFilterRequestDto(
             int pageNumber,
             int pageSize,
@@ -19,9 +21,6 @@ namespace home_wiki_backend.Shared.Models.Dtos
         {
             CategoryIds = categoryIds;
             TagIds = tagIds;
-            CategoryIds = categoryIds;
-            TagIds = tagIds;
-            PartName = partName;
         }
 
         public ArticleFilterRequestDto(
@@ -29,9 +28,6 @@ namespace home_wiki_backend.Shared.Models.Dtos
             int pageSize,
             string partName) : base(pageNumber, pageSize, partName)
         {
-            PageNumber = pageNumber;
-            PageSize = pageSize;
-            PartName = partName;
         }
 
         public ArticleFilterRequestDto(
@@ -39,6 +35,5 @@ namespace home_wiki_backend.Shared.Models.Dtos
             int pageSize) : base(pageNumber, pageSize)
         {
         }
-
     }
 }
