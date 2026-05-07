@@ -36,7 +36,8 @@ namespace home_wiki_backend
                 var connectionString = builder.Configuration
                     .GetConnectionString("DefaultConnection");
                 builder.Services.AddDbContext<DbWikiContext>(options =>
-                    options.UseSqlServer(connectionString));
+                    options.UseNpgsql(connectionString,
+                        b => b.MigrationsAssembly("home-wiki-backend.DAL")));
 
                 // Add CORS policy
                 builder.Services.AddCors(options =>
@@ -87,7 +88,7 @@ namespace home_wiki_backend
                 app.MapControllers();
 
                 // Auto-apply migrations
-                // app.ApplyMigrationsAndSeed();
+                app.ApplyMigrationsAndSeed();
 
                 app.Run();
             }
