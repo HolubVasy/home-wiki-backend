@@ -215,7 +215,9 @@ public class InitialSeeder : ISeeder
             articles.Add(article);
         }
 
-        _context.Articles.AddRange(articles);
+        var existingNames = _context.Articles.Select(a => a.Name).ToHashSet();
+        var newArticles = articles.Where(a => !existingNames.Contains(a.Name)).ToList();
+        _context.Articles.AddRange(newArticles);
         _context.SaveChanges();
     }
 }
