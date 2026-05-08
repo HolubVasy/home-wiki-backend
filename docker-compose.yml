@@ -1,0 +1,52 @@
+services:
+  wiki-db:
+    image: postgres:16-alpine
+    container_name: wiki-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: wiki
+      POSTGRES_USER: wiki
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - wiki-pgdata:/var/lib/postgresql/data
+    networks:
+      - wiki-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wiki -d wiki"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  wiki-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: wiki-backend
+    restart: unless-stopped
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://+:8080
+      ConnectionStrings__DefaultConnection: >-
+        Host=wiki-db;Port=5432;Database=wiki;Username=wiki;Password=${DB_PASSWORD}
+    depends_on:
+      wiki-db:
+        condition: service_healthy
+    networks:
+      - wiki-net
+
+  wiki-frontend:
+    build:
+      context: ../home-wiki-frontend
+      dockerfile: Dockerfile
+    container_name: wiki-frontend
+    restart: unless-stopped
+    networks:
+      - wiki-net
+
+networks:
+  wiki-net:
+    driver: bridge
+
+volumes:
+  wiki-pgdata:
