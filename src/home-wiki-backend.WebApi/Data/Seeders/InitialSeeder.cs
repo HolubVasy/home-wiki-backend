@@ -47,8 +47,9 @@ public class InitialSeeder : ISeeder
             new Category {Name = "Развлечение", CreatedAt = now, CreatedBy = autoSeeding},
         };
 
-        _context.Categories.AddRange(categories);
-        _context.SaveChanges();
+        var existingCatNames = _context.Categories.Select(c => c.Name).ToHashSet();
+        var newCategories = categories.Where(c => existingCatNames.Add(c.Name)).ToArray();
+        if (newCategories.Any()) { _context.Categories.AddRange(newCategories); _context.SaveChanges(); }
 
         // ------------------ 2. Tags ------------------
         var tags = new List<Tag>
@@ -72,8 +73,9 @@ public class InitialSeeder : ISeeder
             new Tag {Name = "Фильмы", CreatedAt = now, CreatedBy = autoSeeding},
         };
 
-        _context.Tags.AddRange(tags);
-        _context.SaveChanges();
+        var existingTagNames = _context.Tags.Select(t => t.Name).ToHashSet();
+        var newTags = tags.Where(t => existingTagNames.Add(t.Name)).ToList();
+        if (newTags.Any()) { _context.Tags.AddRange(newTags); _context.SaveChanges(); }
 
         // ------------------ 3. Articles ------------------
         var articleData = new[]
