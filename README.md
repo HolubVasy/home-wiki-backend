@@ -1,6 +1,6 @@
 # home-wiki-backend
 
-.NET 8 Web API — backend для личной базы знаний по домашнему хозяйству.
+.NET 8 Web API backend for a personal home management knowledge base.
 
 ## Tech Stack
 
@@ -14,13 +14,13 @@
 
 ## Architecture
 
-Clean Architecture, 6 проектов:
+Clean Architecture across 6 projects:
 
 ```
 WebApi → BL → DAL → DAL.Common → Shared
 ```
 
-| Проект | Содержит |
+| Project | Contains |
 |---|---|
 | `WebApi` | Controllers, DI, middleware, Program.cs, seeder |
 | `BL.Common` | Service interfaces + DTOs |
@@ -29,7 +29,7 @@ WebApi → BL → DAL → DAL.Common → Shared
 | `DAL` | GenericRepository, Specifications, EF migrations |
 | `Shared` | ResultModel\<T\>, PagedList\<T\>, ErrorCode enum |
 
-Паттерны: Generic Repository, Specification, ResultModel (сервисы не бросают исключения в контроллер).
+Key patterns: Generic Repository, Specification, ResultModel (services never throw to controllers).
 
 ## Running Locally
 
@@ -38,61 +38,61 @@ cd src
 dotnet run --project home-wiki-backend.WebApi
 ```
 
-Swagger доступен по `/swagger` в режиме Development.
+Swagger is available at `/swagger` in Development mode.
 
-Строка подключения в `appsettings.json`:
+Connection string in `appsettings.json`:
 ```json
 "ConnectionStrings": {
   "DefaultConnection": "Host=localhost;Port=5432;Database=wiki;Username=wiki;Password=..."
 }
 ```
 
-Миграции применяются автоматически при старте через `app.ApplyMigrationsAndSeed()` в `Program.cs`.
+Migrations and seeding are applied automatically on startup via `app.ApplyMigrationsAndSeed()` in `Program.cs`.
 
 ## Docker / VPS Deployment
 
-`docker-compose.yml` находится в корне этого репозитория и управляет тремя сервисами: `wiki-db`, `wiki-backend`, `wiki-frontend`.
+`docker-compose.yml` is in the root of this repository and manages three services: `wiki-db`, `wiki-backend`, `wiki-frontend`.
 
-### Требования на сервере
+### Server Requirements
 
 - Docker + Docker Compose
-- Git clone обоих репо в одну директорию:
+- Both repos cloned into the same parent directory:
 
 ```
 /opt/home-wiki/
-├── home-wiki-backend/    ← этот репо
+├── home-wiki-backend/    ← this repo
 └── home-wiki-frontend/
 ```
 
-- Файл `.env` рядом с `docker-compose.yml`:
+- `.env` file next to `docker-compose.yml`:
 
 ```
-DB_PASSWORD=<пароль>
+DB_PASSWORD=<password>
 ```
 
-### Команды
+### Commands
 
 ```bash
-# Запуск
+# Start all services
 docker compose -f /opt/home-wiki/home-wiki-backend/docker-compose.yml up -d
 
-# Деплой новой версии backend
+# Deploy a new backend version
 git -C /opt/home-wiki/home-wiki-backend pull origin main
 docker compose -f /opt/home-wiki/home-wiki-backend/docker-compose.yml build wiki-backend
 docker compose -f /opt/home-wiki/home-wiki-backend/docker-compose.yml up -d
 
-# Логи
+# View logs
 docker logs wiki-backend --tail 50
 docker logs wiki-db --tail 20
 
-# Чистый перезапуск (удаляет данные БД)
+# Clean restart (destroys DB data)
 docker compose -f /opt/home-wiki/home-wiki-backend/docker-compose.yml down -v
 docker compose -f /opt/home-wiki/home-wiki-backend/docker-compose.yml up -d
 ```
 
 ### Healthcheck
 
-`wiki-db` объявляет healthcheck (`pg_isready`). `wiki-backend` стартует только после `condition: service_healthy` — race condition исключён.
+`wiki-db` declares a healthcheck (`pg_isready`). `wiki-backend` starts only after `condition: service_healthy`, eliminating the race condition on startup.
 
 ## API Endpoints
 
@@ -100,20 +100,20 @@ docker compose -f /opt/home-wiki/home-wiki-backend/docker-compose.yml up -d
 
 | Method | Path | Description |
 |---|---|---|
-| GET | `/` | Все статьи с категорией и тегами |
-| GET | `/{id}` | Статья по ID |
-| GET | `/paged` | Пагинация (`?pageNumber=1&pageSize=10`) |
-| GET | `/search` | Поиск по названию (`?name=X&pageNumber=1&pageSize=10`) |
-| GET | `/category/{id}` | Статьи по категории |
-| GET | `/tag/{id}` | Статьи по тегу |
-| POST | `/` | Создать статью |
-| POST | `/filter` | Расширенный фильтр (body: `ArticleFilterRequestDto`) |
-| PUT | `/` | Обновить статью (синхронизирует теги) |
-| DELETE | `/{id}` | Удалить статью |
+| GET | `/` | All articles with category and tags |
+| GET | `/{id}` | Article by ID |
+| GET | `/paged` | Paginated (`?pageNumber=1&pageSize=10`) |
+| GET | `/search` | Search by name (`?name=X&pageNumber=1&pageSize=10`) |
+| GET | `/category/{id}` | Articles by category |
+| GET | `/tag/{id}` | Articles by tag |
+| POST | `/` | Create article |
+| POST | `/filter` | Advanced filter (body: `ArticleFilterRequestDto`) |
+| PUT | `/` | Update article (syncs tag diff) |
+| DELETE | `/{id}` | Delete article |
 
-### Categories `/api/Category` и Tags `/api/Tag`
+### Categories `/api/Category` and Tags `/api/Tag`
 
-Стандартный CRUD: GET all, GET by id, POST, PUT, DELETE.
+Standard CRUD: GET all, GET by id, POST, PUT, DELETE.
 
 ## Database Schema
 
@@ -124,12 +124,12 @@ article      (pk_article, Name, Description, CategoryId FK, audit fields)
 article_tag  (ArticleId FK, TagId FK)
 ```
 
-> **PostgreSQL note:** имена колонок case-sensitive. В raw SQL используй кавычки: `SELECT "Name" FROM category;`
+> **PostgreSQL note:** column names are case-sensitive. Use quotes in raw SQL: `SELECT "Name" FROM category;`
 
 ## Seed Data
 
-При первом запуске `InitialSeeder` заполняет БД: 6 категорий, 17 тегов, 19 статей на русском.
+On first startup `InitialSeeder` populates the database: 6 categories, 17 tags, 19 articles (in Russian).
 
-Сидер идемпотентный — безопасен при повторных запусках.
+The seeder is idempotent — safe to run on restart.
 
-Категории: Уход за домом, Бытовая техника, Огород и растения, Ремонт и инструменты, Отдых и уют, Развлечение.
+Categories: Уход за домом, Бытовая техника, Огород и растения, Ремонт и инструменты, Отдых и уют, Развлечение.
